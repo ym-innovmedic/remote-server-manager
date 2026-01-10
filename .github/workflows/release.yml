@@ -1,0 +1,117 @@
+name: Release
+
+on:
+  push:
+    tags:
+      - 'v*'
+
+permissions:
+  contents: write
+
+jobs:
+  build:
+    runs-on: ${{ matrix.os }}
+    strategy:
+      matrix:
+        include:
+          - os: ubuntu-latest
+            platform: linux
+          - os: macos-latest
+            platform: darwin
+          - os: windows-latest
+            platform: win32
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20.x
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Run linter
+        run: npm run lint
+
+      - name: Compile TypeScript
+        run: npm run compile
+
+      - name: Run tests
+        run: npm test
+        continue-on-error: true
+
+      - name: Install vsce
+        run: npm install -g @vscode/vsce
+
+      - name: Package extension
+        run: vsce package --out remote-server-manager-${{ matrix.platform }}.vsix
+
+      - name: Upload artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: vsix-${{ matrix.platform }}
+          path: remote-server-manager-${{ matrix.platform }}.vsix
+
+  release:
+    needs: build
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Download all artifacts
+        uses: actions/download-artifact@v4
+        with:
+          path: artifacts
+
+      - name: Generate changelog
+        id: changelog
+        uses: mikepenz/release-changelog-builder-action@v4
+        with:
+          configuration: .github/changelog-config.json
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Get version from tag
+        id: version
+        run: echo "VERSION=${GITHUB_REF#refs/tags/v}" >> $GITHUB_OUTPUT
+
+      - name: Create GitHub Release
+        uses: softprops/action-gh-release@v1
+        with:
+          name: Release v${{ steps.version.outputs.VERSION }}
+          body: |
+            ## What's Changed
+
+            ${{ steps.changelog.outputs.changelog }}
+
+            ## Installation
+
+            ### VS Code Marketplace
+            Search for "Remote Server Manager" in VS Code Extensions.
+
+            ### Manual Installation
+            1. Download the `.vsix` file for your platform
+            2. In VS Code: `Extensions` → `...` → `Install from VSIX`
+
+            ## Checksums
+            ```
+            SHA256 checksums will be added here
+            ```
+          files: |
+            artifacts/vsix-linux/remote-server-manager-linux.vsix
+            artifacts/vsix-darwin/remote-server-manager-darwin.vsix
+            artifacts/vsix-win32/remote-server-manager-win32.vsix
+          draft: false
+          prerelease: false
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
