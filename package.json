@@ -1,0 +1,418 @@
+{
+  "name": "remote-server-manager",
+  "displayName": "Remote Server Manager",
+  "description": "Manage remote server connections (RDP, SSH, SFTP, FTP) using Ansible inventory format. Features auto-login, credential management, and environment labeling.",
+  "version": "0.1.0",
+  "publisher": "yogeshm",
+  "license": "SEE LICENSE IN LICENSE",
+  "engines": {
+    "vscode": "^1.85.0"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/yogeshm/remote-server-manager"
+  },
+  "bugs": {
+    "url": "https://github.com/yogeshm/remote-server-manager/issues"
+  },
+  "homepage": "https://github.com/yogeshm/remote-server-manager#readme",
+  "icon": "resources/icon.png",
+  "galleryBanner": {
+    "color": "#1e1e1e",
+    "theme": "dark"
+  },
+  "categories": [
+    "Other",
+    "Programming Languages"
+  ],
+  "keywords": [
+    "remote",
+    "ssh",
+    "rdp",
+    "sftp",
+    "ftp",
+    "ansible",
+    "server",
+    "connection",
+    "inventory",
+    "macos",
+    "terminal",
+    "remote desktop",
+    "credential manager"
+  ],
+  "activationEvents": [
+    "onView:remoteServerManager"
+  ],
+  "main": "./dist/extension.js",
+  "contributes": {
+    "viewsContainers": {
+      "activitybar": [
+        {
+          "id": "remote-server-manager",
+          "title": "Remote Server Manager",
+          "icon": "resources/icons/remote.svg"
+        }
+      ]
+    },
+    "views": {
+      "remote-server-manager": [
+        {
+          "id": "remoteServerManager",
+          "name": "Connections",
+          "icon": "resources/icons/remote.svg"
+        }
+      ]
+    },
+    "commands": [
+      {
+        "command": "remoteServerManager.refresh",
+        "title": "Refresh",
+        "icon": "$(refresh)"
+      },
+      {
+        "command": "remoteServerManager.search",
+        "title": "Search Connections",
+        "icon": "$(search)"
+      },
+      {
+        "command": "remoteServerManager.clearSearch",
+        "title": "Clear Search",
+        "icon": "$(clear-all)"
+      },
+      {
+        "command": "remoteServerManager.connect",
+        "title": "Connect"
+      },
+      {
+        "command": "remoteServerManager.connectSsh",
+        "title": "Connect via SSH"
+      },
+      {
+        "command": "remoteServerManager.connectSftp",
+        "title": "Connect via SFTP"
+      },
+      {
+        "command": "remoteServerManager.connectUsingFqdn",
+        "title": "Connect using FQDN"
+      },
+      {
+        "command": "remoteServerManager.connectUsingIp",
+        "title": "Connect using IP"
+      },
+      {
+        "command": "remoteServerManager.addConnection",
+        "title": "Add Connection",
+        "icon": "$(add)"
+      },
+      {
+        "command": "remoteServerManager.editConnection",
+        "title": "Edit Connection"
+      },
+      {
+        "command": "remoteServerManager.deleteConnection",
+        "title": "Delete Connection"
+      },
+      {
+        "command": "remoteServerManager.copyHostname",
+        "title": "Copy Hostname"
+      },
+      {
+        "command": "remoteServerManager.copyIpAddress",
+        "title": "Copy IP Address"
+      },
+      {
+        "command": "remoteServerManager.copyDisplayName",
+        "title": "Copy Display Name"
+      },
+      {
+        "command": "remoteServerManager.copyConnectionInfo",
+        "title": "Copy Connection Info"
+      },
+      {
+        "command": "remoteServerManager.copyAsJson",
+        "title": "Copy as JSON"
+      },
+      {
+        "command": "remoteServerManager.toggleFavorite",
+        "title": "Toggle Favorite",
+        "icon": "$(star)"
+      },
+      {
+        "command": "remoteServerManager.quickConnect",
+        "title": "Remote Server Manager: Quick Connect"
+      },
+      {
+        "command": "remoteServerManager.importJson",
+        "title": "Remote Server Manager: Import from JSON"
+      },
+      {
+        "command": "remoteServerManager.importAnsible",
+        "title": "Remote Server Manager: Import Ansible Inventory"
+      },
+      {
+        "command": "remoteServerManager.exportJson",
+        "title": "Remote Server Manager: Export to JSON"
+      },
+      {
+        "command": "remoteServerManager.exportAnsible",
+        "title": "Remote Server Manager: Export to Ansible Inventory"
+      },
+      {
+        "command": "remoteServerManager.openSettings",
+        "title": "Remote Server Manager: Open Settings"
+      },
+      {
+        "command": "remoteServerManager.addInventoryFile",
+        "title": "Remote Server Manager: Add Inventory File",
+        "icon": "$(folder-opened)"
+      },
+      {
+        "command": "remoteServerManager.manageCredentials",
+        "title": "Remote Server Manager: Manage Saved Credentials"
+      }
+    ],
+    "menus": {
+      "view/title": [
+        {
+          "command": "remoteServerManager.search",
+          "when": "view == remoteServerManager",
+          "group": "navigation@1"
+        },
+        {
+          "command": "remoteServerManager.refresh",
+          "when": "view == remoteServerManager",
+          "group": "navigation@2"
+        },
+        {
+          "command": "remoteServerManager.addConnection",
+          "when": "view == remoteServerManager",
+          "group": "navigation@3"
+        }
+      ],
+      "view/item/context": [
+        {
+          "command": "remoteServerManager.toggleFavorite",
+          "when": "view == remoteServerManager && viewItem =~ /connection/",
+          "group": "0_favorite@1"
+        },
+        {
+          "command": "remoteServerManager.connect",
+          "when": "view == remoteServerManager && viewItem =~ /connection/",
+          "group": "1_connect@1"
+        },
+        {
+          "command": "remoteServerManager.connectSsh",
+          "when": "view == remoteServerManager && viewItem =~ /connection/",
+          "group": "1_connect@2"
+        },
+        {
+          "command": "remoteServerManager.connectSftp",
+          "when": "view == remoteServerManager && viewItem =~ /connection/",
+          "group": "1_connect@3"
+        },
+        {
+          "command": "remoteServerManager.connectUsingFqdn",
+          "when": "view == remoteServerManager && viewItem =~ /connection/",
+          "group": "2_connectAlt@1"
+        },
+        {
+          "command": "remoteServerManager.connectUsingIp",
+          "when": "view == remoteServerManager && viewItem =~ /connection/",
+          "group": "2_connectAlt@2"
+        },
+        {
+          "command": "remoteServerManager.copyHostname",
+          "when": "view == remoteServerManager && viewItem =~ /connection/",
+          "group": "3_copy@1"
+        },
+        {
+          "command": "remoteServerManager.copyIpAddress",
+          "when": "view == remoteServerManager && viewItem =~ /connection/",
+          "group": "3_copy@2"
+        },
+        {
+          "command": "remoteServerManager.copyDisplayName",
+          "when": "view == remoteServerManager && viewItem =~ /connection/",
+          "group": "3_copy@3"
+        },
+        {
+          "command": "remoteServerManager.copyConnectionInfo",
+          "when": "view == remoteServerManager && viewItem =~ /connection/",
+          "group": "3_copy@4"
+        },
+        {
+          "command": "remoteServerManager.copyAsJson",
+          "when": "view == remoteServerManager && viewItem =~ /connection/",
+          "group": "3_copy@5"
+        },
+        {
+          "command": "remoteServerManager.editConnection",
+          "when": "view == remoteServerManager && viewItem =~ /connection/",
+          "group": "4_edit@1"
+        },
+        {
+          "command": "remoteServerManager.deleteConnection",
+          "when": "view == remoteServerManager && viewItem =~ /connection/",
+          "group": "4_edit@2"
+        }
+      ],
+      "commandPalette": [
+        {
+          "command": "remoteServerManager.quickConnect",
+          "when": "true"
+        },
+        {
+          "command": "remoteServerManager.importJson",
+          "when": "true"
+        },
+        {
+          "command": "remoteServerManager.importAnsible",
+          "when": "true"
+        },
+        {
+          "command": "remoteServerManager.exportJson",
+          "when": "true"
+        },
+        {
+          "command": "remoteServerManager.exportAnsible",
+          "when": "true"
+        },
+        {
+          "command": "remoteServerManager.addInventoryFile",
+          "when": "true"
+        },
+        {
+          "command": "remoteServerManager.openSettings",
+          "when": "true"
+        },
+        {
+          "command": "remoteServerManager.manageCredentials",
+          "when": "true"
+        }
+      ]
+    },
+    "configuration": {
+      "title": "Remote Server Manager",
+      "properties": {
+        "remoteServerManager.inventoryFiles": {
+          "type": "array",
+          "default": [],
+          "description": "List of Ansible inventory files to load. Each entry can be a path string or an object with path and readOnly properties.",
+          "items": {
+            "oneOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "object",
+                "properties": {
+                  "path": {
+                    "type": "string"
+                  },
+                  "readOnly": {
+                    "type": "boolean",
+                    "default": false
+                  }
+                },
+                "required": [
+                  "path"
+                ]
+              }
+            ]
+          }
+        },
+        "remoteServerManager.defaultCredentialStrategy": {
+          "type": "string",
+          "enum": [
+            "save",
+            "prompt"
+          ],
+          "default": "prompt",
+          "description": "Default credential strategy for new connections. 'save' stores credentials permanently, 'prompt' asks every time."
+        },
+        "remoteServerManager.preferHostnameType": {
+          "type": "string",
+          "enum": [
+            "name",
+            "ansible_host"
+          ],
+          "default": "ansible_host",
+          "description": "Preferred hostname for connections: 'name' uses the FQDN, 'ansible_host' uses the IP address."
+        },
+        "remoteServerManager.showFtpSecurityWarning": {
+          "type": "boolean",
+          "default": true,
+          "description": "Show security warning before FTP connections (FTP transmits data unencrypted)."
+        },
+        "remoteServerManager.defaultSshTerminal": {
+          "type": "string",
+          "enum": [
+            "terminal",
+            "integrated"
+          ],
+          "default": "terminal",
+          "description": "Default terminal for SSH connections: 'terminal' uses Terminal.app, 'integrated' uses VS Code's terminal."
+        },
+        "remoteServerManager.showUngroupedConnections": {
+          "type": "boolean",
+          "default": true,
+          "description": "Show ungrouped connections in the tree view."
+        },
+        "remoteServerManager.displayNameSource": {
+          "type": "string",
+          "enum": [
+            "display_name",
+            "comment",
+            "hostname",
+            "auto"
+          ],
+          "default": "auto",
+          "description": "Source for connection display names. 'auto' uses display_name > comment > hostname priority."
+        },
+        "remoteServerManager.rdpAutoLogin": {
+          "type": "boolean",
+          "default": true,
+          "description": "Enable automatic password filling and certificate acceptance for RDP connections on macOS. Requires Accessibility permissions for VS Code."
+        },
+        "remoteServerManager.rdpAutoCertificateAccept": {
+          "type": "boolean",
+          "default": true,
+          "description": "Automatically click 'Continue' on RDP certificate dialogs. Only applies when rdpAutoLogin is enabled."
+        }
+      }
+    }
+  },
+  "scripts": {
+    "vscode:prepublish": "npm run package",
+    "compile": "webpack",
+    "watch": "webpack --watch",
+    "package": "webpack --mode production --devtool hidden-source-map",
+    "compile-tests": "tsc -p . --outDir out",
+    "watch-tests": "tsc -p . -w --outDir out",
+    "pretest": "npm run compile-tests && npm run compile && npm run lint",
+    "lint": "eslint src --ext ts",
+    "lint:fix": "eslint src --ext ts --fix",
+    "format": "prettier --write \"src/**/*.ts\"",
+    "test": "node ./out/test/runTest.js",
+    "test:unit": "mocha --require ts-node/register 'test/unit/**/*.test.ts'"
+  },
+  "devDependencies": {
+    "@types/chai": "^5.2.3",
+    "@types/mocha": "^10.0.10",
+    "@types/node": "^20.10.0",
+    "@types/vscode": "^1.85.0",
+    "@typescript-eslint/eslint-plugin": "^6.13.0",
+    "@typescript-eslint/parser": "^6.13.0",
+    "@vscode/test-electron": "^2.3.8",
+    "chai": "^6.2.2",
+    "eslint": "^8.54.0",
+    "mocha": "^11.7.5",
+    "prettier": "^3.1.0",
+    "sharp": "^0.34.5",
+    "ts-loader": "^9.5.1",
+    "ts-node": "^10.9.2",
+    "typescript": "^5.3.2",
+    "webpack": "^5.89.0",
+    "webpack-cli": "^5.1.4"
+  }
+}

@@ -1,0 +1,408 @@
+######################################################################################################
+#################################### Linux servers ####################################
+######################################################################################################
+
+#################################### Production Trollhättan site ####################################
+######################################################################################################
+
+# Oracle Linux Server release 7.9
+[weblogic_prod_thn]
+weblogic1.prod.thn.tms.int.pagero.com ansible_host=10.4.48.18 purging_enable='true' fluentd_enable='true' util_list="[tms-purging','tms-docker-image-prune','tms-fluentd]" enabled_utilities="[tms-fluentd]"
+weblogic2.prod.thn.tms.int.pagero.com ansible_host=10.4.48.24 purging_enable='true' fluentd_enable='true' util_list="[tms-purging','tms-docker-image-prune','tms-fluentd]" enabled_utilities="[tms-fluentd]"
+
+# Oracle Linux Server release 7.9
+[services_prod_thn]
+service1.prod.thn.tms.int.pagero.com archive_enable='true' fileage_enable='true' nginx_enable='true' fluentd_enable='true' keepalived_state=MASTER  keepalived_priority=150 ssl_state='true' rsync_to_dr='true' rsync_to_dr_cifs='true' archive_sync_to_dr='true' current_host=service1.prod.thn.tms.int.pagero.com ozone_agent='true' nginx_enable='true' purging_enable='true' services_monitoring_enable='true' docker_image_prune_enable='true' util_list="['tms-nginx','tms-archiving','tms-purging','tms-services-monitoring','tms-ssl-cert','tms-rsync-prod-dr','tms-rsync-prod-dr-cifs','tms-fileage','tms-docker-image-prune','tms-keepalived','tms-fluentd','tms-ozone-agent','tms-ozone-agent-cs','tms-ozone-agent-ts','tms-report-agent','tms-ozone-agent-inv-load','tms-archive-sync-prod-dr']" enabled_utilities="['tms-nginx','tms-archiving','tms-purging','tms-services-monitoring','tms-ssl-cert','tms-rsync-prod-dr','tms-rsync-prod-dr-cifs','tms-fileage','tms-docker-image-prune','tms-keepalived','tms-fluentd','tms-ozone-agent','tms-ozone-agent-cs','tms-ozone-agent-ts','tms-report-agent','tms-ozone-agent-inv-load','tms-archive-sync-prod-dr']"
+service2.prod.thn.tms.int.pagero.com archive_enable='false' fileage_enable='false' fluentd_enable='true' keepalived_state=MASTER keepalived_priority=149 ssl_state='false' rsync_to_dr='false' archive_sync_to_dr='false' current_host=service2.prod.thn.tms.int.pagero.com ozone_agent='false' nginx_enable='true' purging_enable='true' services_monitoring_enable='false' docker_image_prune_enable='true' util_list="['tms-nginx','tms-archiving','tms-purging','tms-services-monitoring','tms-ssl-cert','tms-rsync-prod-dr','tms-rsync-prod-dr-cifs','tms-fileage','tms-docker-image-prune','tms-keepalived','tms-fluentd','tms-ozone-agent','tms-ozone-agent-cs','tms-ozone-agent-ts','tms-report-agent','tms-ozone-agent-inv-load','tms-archive-sync-prod-dr']" enabled_utilities="['tms-nginx','tms-keepalived','tms-fluentd']"
+
+# Oracle Linux Server release 7.9
+[ftp_prod_thn]
+ftp1.prod.thn.tms.int.pagero.com ansible_host=10.4.48.53
+
+# will be needed to enable deployment from gocd to tms1 and tms2
+[weblogic_po_prod_thn]
+tms1.prod.thn.int.pagero.com ansible_host=10.1.180.246 log_suffix=1 archive_enable='true' fileage_enable='true' nginx_enable='true' fluentd_enable='true' po_server='true' dev_mail_server_enable='true' ozone_agent='true' purging_enable='true' services_monitoring_enable='true' ssl_state='true' docker_image_prune_enable='true' ansible_python_interpreter=/usr/bin/python3
+tms2.prod.thn.int.pagero.com ansible_host=10.1.180.247 log_suffix=2 archive_enable='false' fileage_enable='false' nginx_enable='true' fluentd_enable='true' po_server='true' dev_mail_server_enable='false' ozone_agent='false' purging_enable='true' services_monitoring_enable='false' ssl_state='false' docker_image_prune_enable='true' ansible_python_interpreter=/usr/bin/python3
+
+########################################## UAT Trollhättan ###########################################
+######################################################################################################
+
+# Oracle Linux Server release 7.9
+[weblogic_uat_thn]
+weblogic1.uat.thn.tms.int.pagero.com ansible_host=10.4.52.8 keepalived_state=MASTER keepalived_priority=149 nginx_enable='true' purging_enable='true' fluentd_enable='true'
+
+# will be needed to enable deployment from gocd to tms1
+[weblogic_po_staging_thn]
+tms1.staging.thn.int.pagero.com ansible_host=10.1.182.16 log_suffix=1 nginx_enable='true' fluentd_enable='true' po_server='true' dev_mail_server_enable='true' purging_enable='true' docker_image_prune_enable='true' services_monitoring_enable='true' ansible_python_interpreter=/usr/bin/python3
+
+# Oracle Linux Server release 7.9
+[services_uat_thn]
+service1.uat.thn.tms.int.pagero.com ansible_host=10.4.52.13 archive_enable='true' fileage_enable='true' nginx_enable='true' fluentd_enable='true' keepalived_state=MASTER  keepalived_priority=150 ssl_state='true' current_host=service1.uat.thn.tms.int.pagero.com ozone_agent='true' nginx_enable='true' purging_enable='true' services_monitoring_enable='true' docker_image_prune_enable='true'  dev_mail_server_enable='true'
+
+########################################## TEST Trollhättan ##########################################
+######################################################################################################
+
+# will be needed to enable deployment from gocd to tms1
+[weblogic_po_test_thn]
+tms1.test.thn.int.pagero.com ansible_host=10.1.182.136 log_suffix=1 nginx_enable='true' fluentd_enable='true' po_server='true' dev_mail_server_enable='true' ozone_agent='true' purging_enable='true' docker_image_prune_enable='true' archive_enable='true' fileage_enable='true' services_monitoring_enable='true' ssl_state='true' ansible_python_interpreter=/usr/bin/python3
+
+########################################## Stockholm site (DR) ######################################
+######################################################################################################
+
+# Oracle Linux Server release 7.9
+# alias: weblogic1.prod.got.tms.int.pagero.com
+[weblogic_prod_got]
+weblogic1.prod.got.tms.int.pagero.com keepalived_state=MASTER keepalived_priority=149 edit_hosts=true nginx_enable='true' purging_enable='false' ozone_agent='false'
+
+# Oracle Linux Server release 7.9
+# alias: service1.prod.sth.tms.int.pagero.com
+[services_prod_got]
+service1.prod.got.tms.int.pagero.com archive_enable='false' fileage_enable='false' fluentd_enable='true' keepalived_state=MASTER keepalived_priority=150 ssl_state='false' archive_sync_to_prod=true edit_hosts=true rsync_to_prod=true rsync_to_prod_cifs=true current_host=service1.prod.got.tms.int.pagero.com ozone_agent='false' nginx_enable='false' purging_enable='false' services_monitoring_enable='false' docker_image_prune_enable='true' dev_mail_server_enable='true'
+
+# Red Hat Enterprise Linux Server release 7.9 (Maipo)
+[ftp_prod_got]
+#ftp1.prod.sth.tms.int.pagero.com ansible_host=10.4.49.254
+ftp1.prod.got.tms.int.pagero.com ansible_host=10.4.49.254 edit_hosts=false
+
+# will be needed to enable deployment from gocd to tms1 DR
+[weblogic_po_dr_sth]
+tms1.dr.sth.int.pagero.com ansible_host=10.4.96.126 log_suffix=1 nginx_enable='true' fluentd_enable='true' po_server='true' dev_mail_server_enable='true' ozone_agent='true' purging_enable='true' docker_image_prune_enable='true' archive_enable='true' fileage_enable='true' services_monitoring_enable='true' ssl_state='true' ansible_python_interpreter=/usr/bin/python3
+
+################################################# Groups ##############################################
+# This parameter controls if the version update will be done or not from GoCD
+# util_list parameter can be moved under each child of services and weblogic to make it more granular or vice-versa.
+# right now the ones only required on weblogic or services are defined below.
+# Full util_list= [ tms-fileage, tms-archiving, tms-deploy-ansible-go, tms-deploy , tms-ssl-cert, tms-services-monitoring, tms-rsync-prod-dr, tms-rsync-dr-prod, tms-archive-sync-dr-prod, tms-archive-sync-prod-dr, tms-purging, tms-nginx, tms-fluentd, tms-keepalived, tms-ozone-agent, tms-ozone-agent-cs, tms-ozone-agent-ts, tms-report-agent,tms-ozone-agent-inv-load]
+
+[weblogic:vars]
+Is_weblogic='true'
+
+[services:vars]
+Is_weblogic='false'
+
+# Granularly enable disable utils on the individual servers
+# enabled_utilities will call the systemd-service and will restart the service
+# PROD
+# Defined along with the Server name
+
+# DR
+[services_prod_got:vars]
+util_list= [tms-purging, tms-rsync-dr-prod, tms-rsync-dr-prod-cifs, tms-docker-image-prune, tms-fluentd, tms-dev-mail-server, tms-archive-sync-dr-prod, tms-ssl-cert, tms-services-monitoring, tms-archiving, tms-fileage, tms-keepalived, tms-nginx, tms-ozone-agent, tms-ozone-agent-cs, tms-ozone-agent-ts, tms-report-agent, tms-ozone-agent-inv-load]
+enabled_utilities= []
+
+[weblogic_prod_got:vars]
+util_list= [tms-purging, tms-docker-image-prune, tms-fluentd, tms-keepalived, tms-ssl-cert, tms-archiving, tms-fileage, tms-nginx, tms-ozone-agent, tms-ozone-agent-cs, tms-ozone-agent-ts, tms-report-agent, tms-ozone-agent-inv-load]
+enabled_utilities= []
+
+#NON-PROD
+
+[weblogic_uat_thn:vars]
+util_list= [tms-nginx, tms-archiving, tms-fileage, tms-purging, tms-docker-image-prune, tms-keepalived, tms-fluentd, tms-ozone-agent, tms-ozone-agent-cs, tms-ozone-agent-ts, tms-report-agent, tms-ozone-agent-inv-load]
+enabled_utilities= [tms-nginx, tms-keepalived, tms-fluentd]
+
+[weblogic_po_test_thn:vars]
+util_list= [tms-nginx, tms-archiving, tms-fileage, tms-purging, tms-docker-image-prune, tms-keepalived, tms-fluentd, tms-services-monitoring, tms-ssl-cert, tms-ozone-agent, tms-ozone-agent-cs, tms-ozone-agent-ts, tms-report-agent, tms-ozone-agent-inv-load]
+enabled_utilities= [tms-nginx, tms-archiving, tms-purging, tms-services-monitoring, tms-ssl-cert, tms-fileage, tms-docker-image-prune, tms-fluentd, tms-ozone-agent, tms-ozone-agent-cs, tms-ozone-agent-ts, tms-report-agent, tms-ozone-agent-inv-load]
+vault_address=https://vault.test.gcp.int.pagero.com/
+responsible_unit=eagle
+weblogic_docker_image_name=primelog-application-14
+testing=False
+
+[weblogic_po_staging_thn:vars]
+util_list= [tms-nginx, tms-archiving, tms-fileage, tms-purging, tms-services-monitoring, tms-ssl-cert, tms-docker-image-prune, tms-keepalived, tms-fluentd, tms-ozone-agent, tms-ozone-agent-cs, tms-ozone-agent-ts, tms-report-agent, tms-ozone-agent-inv-load, tms-dev-mail-server]
+enabled_utilities= [tms-nginx, tms-purging, tms-services-monitoring, tms-docker-image-prune, tms-fluentd, tms-dev-mail-server ]
+vault_address=https://vault.staging.gcp.int.pagero.com/
+responsible_unit=eagle
+weblogic_docker_image_name=primelog-application-14
+testing=False
+
+[weblogic_po_prod_thn:vars]
+util_list= [tms-nginx, tms-archiving, tms-fileage, tms-purging, tms-services-monitoring, tms-ssl-cert, tms-docker-image-prune, tms-keepalived, tms-fluentd, tms-ozone-agent, tms-ozone-agent-cs, tms-ozone-agent-ts, tms-report-agent, tms-ozone-agent-inv-load]
+enabled_utilities= [tms-nginx, tms-archiving, tms-purging, tms-services-monitoring, tms-ssl-cert, tms-fileage, tms-docker-image-prune, tms-keepalived, tms-fluentd, tms-ozone-agent, tms-ozone-agent-cs, tms-ozone-agent-ts, tms-report-agent, tms-ozone-agent-inv-load]
+vault_address=https://vault.production.gcp.int.pagero.com/
+responsible_unit=eagle
+weblogic_docker_image_name=primelog-application-14
+testing=False
+
+[weblogic_po_dr_sth:vars]
+util_list= [tms-nginx, tms-archiving, tms-fileage, tms-purging, tms-services-monitoring, tms-ssl-cert, tms-docker-image-prune, tms-keepalived, tms-fluentd, tms-ozone-agent, tms-ozone-agent-cs, tms-ozone-agent-ts, tms-report-agent, tms-ozone-agent-inv-load]
+enabled_utilities= []
+vault_address=https://vault.production.gcp.int.pagero.com/
+responsible_unit=eagle
+weblogic_docker_image_name=primelog-application-14
+testing=False
+
+[services_uat_thn:vars]
+util_list= [tms-nginx, tms-archiving, tms-ssl-cert, tms-purging, tms-services-monitoring, tms-fileage, tms-docker-image-prune, tms-keepalived, tms-fluentd, tms-ozone-agent, tms-ozone-agent-cs, tms-ozone-agent-ts, tms-report-agent, tms-ozone-agent-inv-load, tms-dev-mail-server]
+enabled_utilities= [tms-nginx, tms-archiving, tms-ssl-cert, tms-purging, tms-services-monitoring, tms-fileage, tms-docker-image-prune, tms-keepalived, tms-fluentd, tms-ozone-agent, tms-ozone-agent-cs, tms-ozone-agent-ts, tms-report-agent, tms-ozone-agent-inv-load]
+
+[weblogic:children]
+weblogic_prod_thn
+weblogic_prod_got
+weblogic_po_prod_thn
+weblogic_po_dr_sth
+weblogic_uat_thn
+weblogic_po_test_thn
+weblogic_po_staging_thn
+
+[services:children]
+services_prod_thn
+services_prod_got
+services_uat_thn
+
+[prod_thn:children]
+weblogic_prod_thn
+services_prod_thn
+ftp_prod_thn
+
+[docker_prod_thn:children]
+weblogic_prod_thn
+services_prod_thn
+
+[prod_thn:vars]
+site_env=thn/prod
+service_machine_1_ip=10.4.48.26
+service_machine_2_ip=10.4.48.28
+service_virtual_ip=10.4.48.249
+keepalived_password=be34jel
+keepalived_router_id=48
+install_files_ftp=10.4.52.4
+gcp_vm_id=TMS_PROD_#{ENV['HOSTNAME']}
+vault_address=https://vault.production.gcp.int.pagero.com/
+responsible_unit=eagle
+testing=False
+weblogic_docker_image_name=primelog-application-14
+
+[uat_thn:children]
+weblogic_uat_thn
+services_uat_thn
+
+[docker_uat_thn:children]
+weblogic_uat_thn
+services_uat_thn
+
+[uat_thn:vars]
+site_env=thn/uat
+service_machine_1_ip=10.4.52.13
+service_machine_2_ip=10.4.52.8
+service_virtual_ip=10.4.52.251
+keepalived_password=t4be234el3
+keepalived_router_id=52
+install_files_ftp=10.4.52.4
+gcp_vm_id="TMS_UAT_#{ENV['HOSTNAME']}"
+vault_address=https://vault.staging.gcp.int.pagero.com/
+responsible_unit=eagle
+testing=False
+weblogic_docker_image_name=primelog-application-14
+
+[thn:children]
+prod_thn
+uat_thn
+
+[docker_thn:children]
+docker_prod_thn
+docker_uat_thn
+
+[prod_got:children]
+weblogic_prod_got
+services_prod_got
+ftp_prod_got
+
+[prod_got:vars]
+site_env=got/dr
+service_machine_1_ip=10.4.54.133
+service_machine_2_ip=10.4.54.132
+service_virtual_ip=10.4.54.142
+keepalived_password=e3gr3h5634
+keepalived_router_id=54
+install_files_ftp=10.4.52.4
+dns_name1=lms.primelog.com
+dns_name2=tms.pageroonline.com
+dns_name1_po=auth.pageroonline.com
+dns_name2_po=api.pageroonline.com
+service_virtual_ip_po=10.1.181.50
+stop_services=true
+gcp_vm_id=TMS_DR_#{ENV['HOSTNAME']}
+vault_address=https://vault.production.gcp.int.pagero.com/
+responsible_unit=eagle
+testing=False
+weblogic_docker_image_name=primelog-application-14
+
+[got:children]
+prod_got
+
+######################################################################################################
+#################################### Windows servers ####################################
+######################################################################################################
+
+#################################### Production Trollhättan site ####################################
+######################################################################################################
+
+[inobiz_prod_thn]
+# unallocated.prod.thn.tms.int.pagero.com
+inobiz1.prod.thn.tms.int.pagero.com ansible_host=10.4.48.9 ansible_port=5985 ansible_connection=winrm ansible_winrm_transport=ntlm ansible_winrm_server_cert_validation=ignore
+
+[qliksense_prod_thn]
+qliksense.prod.thn.tms.int.pagero.com ansible_host=10.4.48.11 ansible_port=5985 ansible_connection=winrm ansible_winrm_transport=ntlm ansible_winrm_server_cert_validation=ignore
+
+
+
+########################################## UAT Trollhättan ###########################################
+######################################################################################################
+
+[inobiz_uat_thn]
+# Need validation : not working reassigned to qliksense ? 
+# inobiz2.uat.thn.tms.int.pagero.com ansible_host=10.4.52.8 ansible_port=5985 ansible_connection=winrm ansible_winrm_transport=ntlm ansible_winrm_server_cert_validation=ignore
+inobiz1.uat.thn.tms.int.pagero.com ansible_host=10.4.52.3 ansible_port=5985 ansible_connection=winrm ansible_winrm_transport=ntlm ansible_winrm_server_cert_validation=ignore
+
+[qliksense_uat_thn]
+qliksense.uat.thn.tms.int.pagero.com ansible_host=10.4.52.16 ansible_port=5985 ansible_connection=winrm ansible_winrm_transport=ntlm ansible_winrm_server_cert_validation=ignore
+
+
+
+########################################## Gothenburg site (DR) ######################################
+######################################################################################################
+
+[inobiz_dr_got]
+# alias: inobiz1.prod.sth.tms.int.pagero.com
+inobiz1.prod.got.tms.int.pagero.com ansible_host=10.4.49.18 ansible_port=5985 ansible_connection=winrm ansible_winrm_transport=ntlm ansible_winrm_server_cert_validation=ignore
+
+[qliksense_dr_got]
+qliksense.prod.got.tms.int.pagero.com ansible_host=10.4.49.83 ansible_port=5985 ansible_connection=winrm ansible_winrm_transport=ntlm ansible_winrm_server_cert_validation=ignore
+
+######################################################################################################
+#################################### DB servers (Nordlo/Zetup) #########################
+######################################################################################################
+
+[prod_db_server]
+##OL 7.9
+db1.prod.thn.tms.int.pagero.com ansible_host=10.4.48.22
+
+[dr_db_server]
+# alias: db1.prod.got.tms.int.pagero.com
+db1.prod.sth.tms.int.pagero.com ansible_host=10.4.54.131
+
+[prod_mssql_server]
+##Windows Server 2016 alias mssql1.prod.sth.tms.int.pagero.com
+#alias mssql1.uat.thn
+mssql1.prod.thn.tms.int.pagero.com ansible_host=10.4.48.7 ansible_port=5985 ansible_connection=winrm ansible_winrm_transport=ntlm ansible_winrm_server_cert_validation=ignore
+
+[dr_mssql_server]
+# alias: mssql1.prod.got.tms.int.pagero.com
+mssql1.prod.sth.tms.int.pagero.com ansible_host=10.4.49.26 ansible_port=5985 ansible_connection=winrm ansible_winrm_transport=ntlm ansible_winrm_server_cert_validation=ignore
+
+######################################################################################################
+#################################### Active Directory servers (Nordlo/Zetup) #########################
+######################################################################################################
+
+[prod_ad_server]
+dc1.prod.thn.tms.int.pagero.com ansible_host=10.4.48.5 ansible_port=5985 ansible_connection=winrm ansible_winrm_transport=ntlm ansible_winrm_server_cert_validation=ignore
+[dr_ad_server]
+# alias: dc2.prod.got.tms.int.pagero.com
+dc2.prod.sth.tms.int.pagero.com ansible_host=10.4.56.82 ansible_port=5985 ansible_connection=winrm ansible_winrm_transport=ntlm ansible_winrm_server_cert_validation=ignore
+
+######################################################################################################
+#################################### Physical servers servers  #########################
+######################################################################################################
+[physical_servers]
+segotplst01 ansible_host=10.4.51.11 ansible_port=5985 ansible_connection=winrm ansible_winrm_transport=ntlm ansible_winrm_server_cert_validation=ignore
+
+######################################################################################################
+#################################### Nordlo servers  #########################
+######################################################################################################
+[ovm_servers]
+sethnpl008 ansible_host=10.4.48.8 ansible_connection=ssh comment="OVM Manager"
+
+[jump_hosts]
+sethnpl035 ansible_host=10.4.48.35 ansible_port=5985 ansible_connection=winrm ansible_winrm_transport=ntlm ansible_winrm_server_cert_validation=ignore comment="Nordlo jump host"
+
+[zscaler_hosts]
+sethnpl040 ansible_host=10.4.48.111 ansible_connection=ssh comment="ZScaler connector PROD"
+sethnpl041 ansible_host=10.4.48.112 ansible_connection=ssh comment="ZScaler connector PROD"
+
+[tools_hosts]
+sethnpl044 ansible_host=10.4.48.6 ansible_connection=ssh comment="Nordlo tools PROD"
+################################################# Groups ##############################################
+######################################################################################################
+
+[inobiz:children]
+inobiz_prod_thn
+inobiz_uat_thn
+inobiz_dr_got
+
+
+[qliksense:children]
+qliksense_prod_thn
+qliksense_uat_thn
+qliksense_dr_got
+
+[qliksense_prod_thn:vars]
+SERVER_HOST="10.4.48.11"
+SERVER_ENV="PROD"
+
+[inobiz_uat_thn:vars]
+inobiz_sql_odbc_name=InobizIS5
+inobiz_sql_instance=SETHNPL021\UAT
+inobiz_sql_instance_descr=InobizIS5 SQL Server
+inobiz_sql_db_name=InobizIS5
+oracle_odbc_name=P1UAT
+oracle_instance=P1UAT
+
+[qliksense_uat_thn:vars]
+SERVER_HOST="10.4.52.16"
+SERVER_ENV="UAT"
+
+[inobiz_dr_got:vars]
+stop_services=true
+
+[qliksense_dr_got:vars]
+SERVER_HOST="10.4.49.83"
+SERVER_ENV="DR"
+
+[ftp_servers:children]
+ftp_prod_thn
+ftp_prod_got
+
+[db_servers:children]
+prod_db_server
+dr_db_server
+prod_mssql_server
+dr_mssql_server
+
+[ad_servers:children]
+prod_ad_server
+dr_ad_server
+
+
+[linux_servers:children]
+weblogic_prod_thn
+weblogic_prod_got
+weblogic_po_prod_thn
+weblogic_po_dr_sth
+weblogic_uat_thn
+weblogic_po_test_thn
+weblogic_po_staging_thn
+services_prod_thn
+services_prod_got
+services_uat_thn
+ftp_prod_thn
+ftp_prod_got
+prod_db_server
+dr_db_server
+ovm_servers
+zscaler_hosts
+tools_hosts
+
+[windows_servers:children]
+inobiz_prod_thn
+qliksense_prod_thn
+inobiz_uat_thn
+qliksense_uat_thn
+inobiz_dr_got
+qliksense_dr_got
+prod_mssql_server
+dr_mssql_server
+prod_ad_server
+dr_ad_server
+physical_servers
+jump_hosts

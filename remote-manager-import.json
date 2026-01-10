@@ -1,0 +1,715 @@
+{
+  "connections": [
+    {
+      "name": "Nordlo UAT Inobiz2 (sethnpl036 - 10.4.52.16)",
+      "hostname": "10.4.52.16",
+      "type": "rdp",
+      "group": "uat thn",
+      "id": "conn_1736251200001_a1b2c3d4e",
+      "createdAt": "2026-01-07T12:00:00.000Z",
+      "modifiedAt": "2026-01-07T12:00:00.000Z",
+      "credentialId": "cred_1736251200001_larsv_rdp"
+    },
+    {
+      "name": "Nordlo PROD QlikView1 - OLD - (sethnpl022 - 10.4.48.4)",
+      "hostname": "10.4.48.4",
+      "type": "rdp",
+      "group": "prod thn",
+      "id": "conn_1736251200002_b2c3d4e5f",
+      "createdAt": "2026-01-07T12:00:00.000Z",
+      "modifiedAt": "2026-01-07T12:00:00.000Z",
+      "credentialId": "cred_1736251200001_larsv_rdp",
+      "connectionSettings": {
+        "domain": "tms-int"
+      }
+    },
+    {
+      "name": "Nordlo UAT QlikView1 - OLD - (sethnpl023 - 10.4.52.14)",
+      "hostname": "10.4.52.14",
+      "type": "rdp",
+      "group": "uat thn",
+      "id": "conn_1736251200003_c3d4e5f6g",
+      "createdAt": "2026-01-07T12:00:00.000Z",
+      "modifiedAt": "2026-01-07T12:00:00.000Z",
+      "credentialId": "cred_1736251200001_larsv_rdp"
+    },
+    {
+      "name": "Nordlo PROD-DR Qlikview1 - OLD - (segotpl016 - 10.4.54.135)",
+      "hostname": "10.4.54.135",
+      "type": "rdp",
+      "group": "prod got",
+      "id": "conn_1736251200004_d4e5f6g7h",
+      "createdAt": "2026-01-07T12:00:00.000Z",
+      "modifiedAt": "2026-01-07T12:00:00.000Z",
+      "credentialId": "cred_1736251200001_larsv_rdp",
+      "connectionSettings": {
+        "domain": "tms-int"
+      }
+    },
+    {
+      "name": "Nordlo PROD-DR Qlikview1 (segotpl017 - 10.4.54.136)",
+      "hostname": "qlikview1.prod.got.tms.int.pagero.com",
+      "type": "rdp",
+      "group": "prod got",
+      "id": "conn_1736251200005_e5f6g7h8i",
+      "createdAt": "2026-01-07T12:00:00.000Z",
+      "modifiedAt": "2026-01-07T12:00:00.000Z",
+      "credentialId": "cred_1736251200001_larsv_rdp",
+      "connectionSettings": {
+        "domain": "tms-int"
+      }
+    },
+    {
+      "name": "Nordlo PROD-DR NFS (segotplst01 - 10.4.51.11)",
+      "hostname": "10.4.51.11",
+      "type": "rdp",
+      "group": "prod got",
+      "id": "conn_1736251200006_f6g7h8i9j",
+      "createdAt": "2026-01-07T12:00:00.000Z",
+      "modifiedAt": "2026-01-07T12:00:00.000Z",
+      "credentialId": "cred_1736251200001_larsv_rdp"
+    },
+    {
+      "name": "Nordlo PROD MsSQL1 (sethnpl009 - 10.4.48.9)",
+      "hostname": "mssql1.prod.thn.tms.int.pagero.com",
+      "type": "rdp",
+      "group": "prod thn",
+      "id": "conn_1736251200007_g7h8i9j0k",
+      "createdAt": "2026-01-07T12:00:00.000Z",
+      "modifiedAt": "2026-01-07T12:00:00.000Z",
+      "credentialId": "cred_1736251200001_larsv_rdp"
+    },
+    {
+      "name": "DECOMMISSIONED - Nordlo PROD QlikView1 (sethnpl022 - 10.4.48.4)",
+      "hostname": "10.4.48.4",
+      "type": "rdp",
+      "group": "prod thn",
+      "id": "conn_1736251200008_h8i9j0k1l",
+      "createdAt": "2026-01-07T12:00:00.000Z",
+      "modifiedAt": "2026-01-07T12:00:00.000Z",
+      "credentialId": "cred_1736251200001_larsv_rdp",
+      "connectionSettings": {
+        "domain": "tms-int"
+      }
+    },
+    {
+      "name": "Nordlo PROD QlikView1 (sethnpl033- 10.4.48.10)",
+      "hostname": "qlikview1.prod.thn.tms.int.pagero.com",
+      "type": "rdp",
+      "group": "prod thn",
+      "id": "conn_1736251200009_i9j0k1l2m",
+      "createdAt": "2026-01-07T12:00:00.000Z",
+      "modifiedAt": "2026-01-07T12:00:00.000Z",
+      "credentialId": "cred_1736251200001_larsv_rdp",
+      "connectionSettings": {
+        "domain": "tms-int"
+      }
+    },
+    {
+      "name": "Quick Connect (RDP)",
+      "hostname": "10.4.51.11",
+      "type": "rdp",
+      "group": "",
+      "id": "conn_1736251200010_j0k1l2m3n",
+      "createdAt": "2026-01-07T12:00:00.000Z",
+      "modifiedAt": "2026-01-07T12:00:00.000Z",
+      "credentialId": "cred_1736251200001_larsv_rdp"
+    },
+    {
+      "name": "Quick Connect (SSH)",
+      "hostname": "10.4.48.16",
+      "type": "ssh",
+      "group": "",
+      "id": "conn_1736251200011_k1l2m3n4o",
+      "createdAt": "2026-01-07T12:00:00.000Z",
+      "modifiedAt": "2026-01-07T12:00:00.000Z",
+      "credentialId": "cred_1736251200002_larsv_ssh",
+      "connectionSettings": {
+        "sshPort": 22
+      }
+    },
+    {
+      "name": "Nordlo TEST WebLogic1 SFTP (sethnpl011 - 10.4.52.6)",
+      "hostname": "weblogic1.test.thn.tms.int.pagero.com",
+      "type": "ssh",
+      "group": "test thn",
+      "id": "conn_1736251200012_l2m3n4o5p",
+      "createdAt": "2026-01-07T12:00:00.000Z",
+      "modifiedAt": "2026-01-07T12:00:00.000Z",
+      "credentialId": "cred_1736251200002_larsv_ssh",
+      "connectionSettings": {
+        "sshPort": 22
+      }
+    },
+    {
+      "name": "Nordlo TEST Service1 SFTP (sethnpl025 - 10.4.52.12)",
+      "hostname": "service1.test.thn.tms.int.pagero.com",
+      "type": "ssh",
+      "group": "test thn",
+      "id": "conn_1736251200013_m3n4o5p6q",
+      "createdAt": "2026-01-07T12:00:00.000Z",
+      "modifiedAt": "2026-01-07T12:00:00.000Z",
+      "credentialId": "cred_1736251200002_larsv_ssh",
+      "connectionSettings": {
+        "sshPort": 22
+      }
+    },
+    {
+      "name": "OLD Nordlo PROD QlikView1 (sethnpl022 - 10.4.48.4)",
+      "hostname": "qlikview1.prod.thn.tms.int.pagero.com",
+      "type": "rdp",
+      "group": "prod thn",
+      "id": "conn_1736251200014_n4o5p6q7r",
+      "createdAt": "2026-01-07T12:00:00.000Z",
+      "modifiedAt": "2026-01-07T12:00:00.000Z",
+      "credentialId": "cred_1736251200001_larsv_rdp",
+      "connectionSettings": {
+        "domain": "tms-int"
+      }
+    },
+    {
+      "name": "Nordlo PROD QlikView1 (sethnpl033 - 10.4.48.10)",
+      "hostname": "10.4.48.10",
+      "type": "rdp",
+      "group": "prod thn",
+      "id": "conn_1736251200015_o5p6q7r8s",
+      "createdAt": "2026-01-07T12:00:00.000Z",
+      "modifiedAt": "2026-01-07T12:00:00.000Z",
+      "credentialId": "cred_1736251200001_larsv_rdp",
+      "connectionSettings": {
+        "domain": "tms-int"
+      }
+    },
+    {
+      "name": "Nordlo UAT QlikView1 OLD (sethnpl023 - 10.4.52.14)",
+      "hostname": "10.4.52.14",
+      "type": "rdp",
+      "group": "uat thn",
+      "id": "conn_1736251200016_p6q7r8s9t",
+      "createdAt": "2026-01-07T12:00:00.000Z",
+      "modifiedAt": "2026-01-07T12:00:00.000Z",
+      "credentialId": "cred_1736251200001_larsv_rdp"
+    },
+    {
+      "name": "Nordlo UAT QlikView1 (sethnpl032 - 10.4.52.11)",
+      "hostname": "qlikview1.uat.thn.tms.int.pagero.com",
+      "type": "rdp",
+      "group": "uat thn",
+      "id": "conn_1736251200017_q7r8s9t0u",
+      "createdAt": "2026-01-07T12:00:00.000Z",
+      "modifiedAt": "2026-01-07T12:00:00.000Z",
+      "credentialId": "cred_1736251200001_larsv_rdp"
+    },
+    {
+      "name": "Nordlo PROD-DR SQLServer (segotpl012)",
+      "hostname": "10.4.49.26",
+      "type": "rdp",
+      "group": "prod got",
+      "id": "conn_1736251200018_r8s9t0u1v",
+      "createdAt": "2026-01-07T12:00:00.000Z",
+      "modifiedAt": "2026-01-07T12:00:00.000Z",
+      "credentialId": "cred_1736251200001_larsv_rdp"
+    },
+    {
+      "name": "Nordlo UAT OracleDB (sethnpl013)",
+      "hostname": "10.4.52.7",
+      "type": "ssh",
+      "group": "uat thn",
+      "id": "conn_1736251200019_s9t0u1v2w",
+      "createdAt": "2026-01-07T12:00:00.000Z",
+      "modifiedAt": "2026-01-07T12:00:00.000Z",
+      "connectionSettings": {
+        "sshPort": 22
+      }
+    },
+    {
+      "name": "Nordlo PROD-DR Service1 (segotpl014 - 10.4.54.133)",
+      "hostname": "service1.prod.got.tms.int.pagero.com",
+      "type": "ssh",
+      "group": "prod got",
+      "id": "conn_1736251200020_t0u1v2w3x",
+      "createdAt": "2026-01-07T12:00:00.000Z",
+      "modifiedAt": "2026-01-07T12:00:00.000Z",
+      "connectionSettings": {
+        "sshPort": 22
+      }
+    },
+    {
+      "name": "Nordlo PROD CrushFTP (sethnpl002 - 10.4.48.52)",
+      "hostname": "ftp1.prod.thn.tms.int.pagero.com",
+      "type": "ssh",
+      "group": "prod thn",
+      "id": "conn_1736251200021_u1v2w3x4y",
+      "createdAt": "2026-01-07T12:00:00.000Z",
+      "modifiedAt": "2026-01-07T12:00:00.000Z",
+      "connectionSettings": {
+        "sshPort": 22
+      }
+    },
+    {
+      "name": "Nordlo PROD WebLogic2 (sethnpl014 - 10.4.48.24)",
+      "hostname": "weblogic2.prod.thn.tms.int.pagero.com",
+      "type": "ssh",
+      "group": "prod thn",
+      "id": "conn_1736251200022_v2w3x4y5z",
+      "createdAt": "2026-01-07T12:00:00.000Z",
+      "modifiedAt": "2026-01-07T12:00:00.000Z",
+      "credentialId": "cred_1736251200002_larsv_ssh",
+      "connectionSettings": {
+        "sshPort": 22
+      }
+    },
+    {
+      "name": "Nordlo TEST Service1 (sethnpl025 - 10.4.52.12)",
+      "hostname": "service1.test.thn.tms.int.pagero.com",
+      "type": "ssh",
+      "group": "test thn",
+      "id": "conn_1736251200023_w3x4y5z6a",
+      "createdAt": "2026-01-07T12:00:00.000Z",
+      "modifiedAt": "2026-01-07T12:00:00.000Z",
+      "credentialId": "cred_1736251200002_larsv_ssh",
+      "connectionSettings": {
+        "sshPort": 22
+      }
+    },
+    {
+      "name": "SKF UAT WebLogic",
+      "hostname": "163.157.64.187",
+      "type": "rdp",
+      "group": "uat skf",
+      "id": "conn_1736251200024_x4y5z6a7b",
+      "createdAt": "2026-01-07T12:00:00.000Z",
+      "modifiedAt": "2026-01-07T12:00:00.000Z",
+      "credentialId": "cred_1736251200003_primelog_rdp"
+    },
+    {
+      "name": "SKF PROD 106 WebLogic primelog (local)",
+      "hostname": "163.157.110.106",
+      "type": "rdp",
+      "group": "prod skf",
+      "id": "conn_1736251200025_y5z6a7b8c",
+      "createdAt": "2026-01-07T12:00:00.000Z",
+      "modifiedAt": "2026-01-07T12:00:00.000Z",
+      "credentialId": "cred_1736251200003_primelog_rdp"
+    },
+    {
+      "name": "Nordlo UAT Service1 (sethnpl027 - 10.4.52.13)",
+      "hostname": "service1.uat.thn.tms.int.pagero.com",
+      "type": "ssh",
+      "group": "uat thn",
+      "id": "conn_1736251200026_z6a7b8c9d",
+      "createdAt": "2026-01-07T12:00:00.000Z",
+      "modifiedAt": "2026-01-07T12:00:00.000Z",
+      "credentialId": "cred_1736251200002_larsv_ssh",
+      "connectionSettings": {
+        "sshPort": 22
+      }
+    },
+    {
+      "name": "Nordlo PROD Service2 (sethnpl028 - 10.4.48.28)",
+      "hostname": "service2.prod.thn.tms.int.pagero.com",
+      "type": "ssh",
+      "group": "prod thn",
+      "id": "conn_1736251200027_a7b8c9d0e",
+      "createdAt": "2026-01-07T12:00:00.000Z",
+      "modifiedAt": "2026-01-07T12:00:00.000Z",
+      "credentialId": "cred_1736251200002_larsv_ssh",
+      "connectionSettings": {
+        "sshPort": 22
+      }
+    },
+    {
+      "name": "Nordlo UAT CrushFTP (sethnpl004 - 10.4.52.10)",
+      "hostname": "ftp1.uat.thn.tms.int.pagero.com",
+      "type": "ssh",
+      "group": "uat thn",
+      "id": "conn_1736251200028_b8c9d0e1f",
+      "createdAt": "2026-01-07T12:00:00.000Z",
+      "modifiedAt": "2026-01-07T12:00:00.000Z",
+      "connectionSettings": {
+        "sshPort": 22
+      }
+    },
+    {
+      "name": "SKF UAT Inobiz",
+      "hostname": "163.157.22.102",
+      "type": "rdp",
+      "group": "uat skf",
+      "id": "conn_1736251200029_c9d0e1f2g",
+      "createdAt": "2026-01-07T12:00:00.000Z",
+      "modifiedAt": "2026-01-07T12:00:00.000Z",
+      "credentialId": "cred_1736251200003_primelog_rdp"
+    },
+    {
+      "name": "Nordlo UAT WebLogic1 (sethnpl019 - 10.4.52.8)",
+      "hostname": "weblogic1.uat.thn.tms.int.pagero.com",
+      "type": "ssh",
+      "group": "uat thn",
+      "id": "conn_1736251200030_d0e1f2g3h",
+      "createdAt": "2026-01-07T12:00:00.000Z",
+      "modifiedAt": "2026-01-07T12:00:00.000Z",
+      "connectionSettings": {
+        "sshPort": 22
+      }
+    },
+    {
+      "name": "SKF PROD 105 WebLogic primelog (local)",
+      "hostname": "163.157.110.105",
+      "type": "rdp",
+      "group": "prod skf",
+      "id": "conn_1736251200031_e1f2g3h4i",
+      "createdAt": "2026-01-07T12:00:00.000Z",
+      "modifiedAt": "2026-01-07T12:00:00.000Z",
+      "credentialId": "cred_1736251200003_primelog_rdp"
+    },
+    {
+      "name": "SKF PROD 106 WebLogic primelog",
+      "hostname": "163.157.110.106",
+      "type": "rdp",
+      "group": "prod skf",
+      "id": "conn_1736251200032_f2g3h4i5j",
+      "createdAt": "2026-01-07T12:00:00.000Z",
+      "modifiedAt": "2026-01-07T12:00:00.000Z",
+      "credentialId": "cred_1736251200003_primelog_rdp",
+      "connectionSettings": {
+        "domain": "GOTDMZ"
+      }
+    },
+    {
+      "name": "Build (Pagero - 10.1.182.67)",
+      "hostname": "jenkins.int.pagero.com",
+      "type": "ssh",
+      "group": "build thn",
+      "id": "conn_1736251200033_g3h4i5j6k",
+      "createdAt": "2026-01-07T12:00:00.000Z",
+      "modifiedAt": "2026-01-07T12:00:00.000Z",
+      "credentialId": "cred_1736251200002_larsv_ssh",
+      "connectionSettings": {
+        "sshPort": 22
+      }
+    },
+    {
+      "name": "Nordlo PROD-DR Inobiz2 (segotpl009 - 10.4.49.22)",
+      "hostname": "inobiz2.prod.got.tms.int.pagero.com",
+      "type": "rdp",
+      "group": "prod got",
+      "id": "conn_1736251200034_h4i5j6k7l",
+      "createdAt": "2026-01-07T12:00:00.000Z",
+      "modifiedAt": "2026-01-07T12:00:00.000Z",
+      "credentialId": "cred_1736251200001_larsv_rdp"
+    },
+    {
+      "name": "Nordlo PROD-DR SQLServer (segotpl015)",
+      "hostname": "10.4.54.134",
+      "type": "rdp",
+      "group": "prod got",
+      "id": "conn_1736251200035_i5j6k7l8m",
+      "createdAt": "2026-01-07T12:00:00.000Z",
+      "modifiedAt": "2026-01-07T12:00:00.000Z",
+      "credentialId": "cred_1736251200001_larsv_rdp"
+    },
+    {
+      "name": "Nordlo PROD Inobiz1 (sethnpl009 - 10.4.48.9)",
+      "hostname": "inobiz1.prod.thn.tms.int.pagero.com",
+      "type": "rdp",
+      "group": "prod thn",
+      "id": "conn_1736251200036_j6k7l8m9n",
+      "createdAt": "2026-01-07T12:00:00.000Z",
+      "modifiedAt": "2026-01-07T12:00:00.000Z",
+      "credentialId": "cred_1736251200001_larsv_rdp"
+    },
+    {
+      "name": "Nordlo PROD Service1 (sethnpl026 - 10.4.48.26)",
+      "hostname": "service1.prod.thn.tms.int.pagero.com",
+      "type": "ssh",
+      "group": "prod thn",
+      "id": "conn_1736251200037_k7l8m9n0o",
+      "createdAt": "2026-01-07T12:00:00.000Z",
+      "modifiedAt": "2026-01-07T12:00:00.000Z",
+      "credentialId": "cred_1736251200002_larsv_ssh",
+      "connectionSettings": {
+        "sshPort": 22
+      }
+    },
+    {
+      "name": "Nordlo PROD-DR Inobiz1 (segotpl008 - 10.4.49.18)",
+      "hostname": "inobiz1.prod.got.tms.int.pagero.com",
+      "type": "rdp",
+      "group": "prod got",
+      "id": "conn_1736251200038_l8m9n0o1p",
+      "createdAt": "2026-01-07T12:00:00.000Z",
+      "modifiedAt": "2026-01-07T12:00:00.000Z",
+      "credentialId": "cred_1736251200001_larsv_rdp"
+    },
+    {
+      "name": "Nordlo UAT Inobiz1 (sethnpl016 - 10.4.52.3)",
+      "hostname": "inobiz1.uat.thn.tms.int.pagero.com",
+      "type": "rdp",
+      "group": "uat thn",
+      "id": "conn_1736251200039_m9n0o1p2q",
+      "createdAt": "2026-01-07T12:00:00.000Z",
+      "modifiedAt": "2026-01-07T12:00:00.000Z",
+      "credentialId": "cred_1736251200001_larsv_rdp"
+    },
+    {
+      "name": "Nordlo UAT QlikView1 (sethnpl023 - 10.4.52.11)",
+      "hostname": "qlikview1.uat.thn.tms.int.pagero.com",
+      "type": "rdp",
+      "group": "uat thn",
+      "id": "conn_1736251200040_n0o1p2q3r",
+      "createdAt": "2026-01-07T12:00:00.000Z",
+      "modifiedAt": "2026-01-07T12:00:00.000Z",
+      "credentialId": "cred_1736251200001_larsv_rdp"
+    },
+    {
+      "name": "Nordlo PROD-DR DC2 (segotpl003 - 10.4.49.12)",
+      "hostname": "dc2.prod.got.tms.int.pagero.com",
+      "type": "rdp",
+      "group": "prod got",
+      "id": "conn_1736251200041_o1p2q3r4s",
+      "createdAt": "2026-01-07T12:00:00.000Z",
+      "modifiedAt": "2026-01-07T12:00:00.000Z",
+      "credentialId": "cred_1736251200001_larsv_rdp"
+    },
+    {
+      "name": "Nordlo PROD-DR CrushFTP (segotpl001 - 10.4.49.54)",
+      "hostname": "ftp1.prod.got.tms.int.pagero.com",
+      "type": "ssh",
+      "group": "prod got",
+      "id": "conn_1736251200042_p2q3r4s5t",
+      "createdAt": "2026-01-07T12:00:00.000Z",
+      "modifiedAt": "2026-01-07T12:00:00.000Z",
+      "connectionSettings": {
+        "sshPort": 22
+      }
+    },
+    {
+      "name": "Nordlo PROD DC1 (sethnpl001 - 10.4.48.5)",
+      "hostname": "dc1.prod.thn.tms.int.pagero.com",
+      "type": "rdp",
+      "group": "prod thn",
+      "id": "conn_1736251200043_q3r4s5t6u",
+      "createdAt": "2026-01-07T12:00:00.000Z",
+      "modifiedAt": "2026-01-07T12:00:00.000Z",
+      "credentialId": "cred_1736251200001_larsv_rdp",
+      "connectionSettings": {
+        "domain": "TMS-INT"
+      }
+    },
+    {
+      "name": "Nordlo PROD Inobiz2 (sethnpl017 - 10.4.48.11)",
+      "hostname": "inobiz2.prod.thn.tms.int.pagero.com",
+      "type": "rdp",
+      "group": "prod thn",
+      "id": "conn_1736251200044_r4s5t6u7v",
+      "createdAt": "2026-01-07T12:00:00.000Z",
+      "modifiedAt": "2026-01-07T12:00:00.000Z",
+      "credentialId": "cred_1736251200001_larsv_rdp"
+    },
+    {
+      "name": "Nordlo PROD QlikView1 (sethnpl022 - 10.4.48.4)",
+      "hostname": "qlikview1.prod.thn.tms.int.pagero.com",
+      "type": "rdp",
+      "group": "prod thn",
+      "id": "conn_1736251200045_s5t6u7v8w",
+      "createdAt": "2026-01-07T12:00:00.000Z",
+      "modifiedAt": "2026-01-07T12:00:00.000Z",
+      "credentialId": "cred_1736251200001_larsv_rdp",
+      "connectionSettings": {
+        "domain": "tms-int"
+      }
+    },
+    {
+      "name": "Nordlo PROD WebLogic1 (sethnpl018 - 10.4.48.18)",
+      "hostname": "weblogic1.prod.thn.tms.int.pagero.com",
+      "type": "ssh",
+      "group": "prod thn",
+      "id": "conn_1736251200046_t6u7v8w9x",
+      "createdAt": "2026-01-07T12:00:00.000Z",
+      "modifiedAt": "2026-01-07T12:00:00.000Z",
+      "credentialId": "cred_1736251200002_larsv_ssh",
+      "connectionSettings": {
+        "sshPort": 22
+      }
+    },
+    {
+      "name": "Nordlo SQL Server (sethnpl021)",
+      "hostname": "10.4.48.7",
+      "type": "rdp",
+      "group": "prod thn",
+      "id": "conn_1736251200047_u7v8w9x0y",
+      "createdAt": "2026-01-07T12:00:00.000Z",
+      "modifiedAt": "2026-01-07T12:00:00.000Z",
+      "credentialId": "cred_1736251200001_larsv_rdp"
+    },
+    {
+      "name": "Nordlo PROD-DR Qlikview1 (segotpl016 - 10.4.54.135)",
+      "hostname": "qlikview1.prod.got.tms.int.pagero.com",
+      "type": "rdp",
+      "group": "prod got",
+      "id": "conn_1736251200048_v8w9x0y1z",
+      "createdAt": "2026-01-07T12:00:00.000Z",
+      "modifiedAt": "2026-01-07T12:00:00.000Z",
+      "credentialId": "cred_1736251200001_larsv_rdp",
+      "connectionSettings": {
+        "domain": "tms-int"
+      }
+    },
+    {
+      "name": "Nordlo PROD OracleDB (sethnpl012)",
+      "hostname": "10.4.48.22",
+      "type": "ssh",
+      "group": "prod thn",
+      "id": "conn_1736251200049_w9x0y1z2a",
+      "createdAt": "2026-01-07T12:00:00.000Z",
+      "modifiedAt": "2026-01-07T12:00:00.000Z",
+      "connectionSettings": {
+        "sshPort": 22
+      }
+    },
+    {
+      "name": "Nordlo PROD-DR OracleDB (segotpl010)",
+      "hostname": "10.4.54.131",
+      "type": "ssh",
+      "group": "prod got",
+      "id": "conn_1736251200050_x0y1z2a3b",
+      "createdAt": "2026-01-07T12:00:00.000Z",
+      "modifiedAt": "2026-01-07T12:00:00.000Z",
+      "connectionSettings": {
+        "sshPort": 22
+      }
+    },
+    {
+      "name": "Nordlo PROD-DR WebLogic1 (segotpl011- 10.4.54.132)",
+      "hostname": "weblogic1.prod.got.tms.int.pagero.com",
+      "type": "ssh",
+      "group": "prod got",
+      "id": "conn_1736251200051_y1z2a3b4c",
+      "createdAt": "2026-01-07T12:00:00.000Z",
+      "modifiedAt": "2026-01-07T12:00:00.000Z",
+      "connectionSettings": {
+        "sshPort": 22
+      }
+    },
+    {
+      "name": "Nordlo TEST WebLogic1 (sethnpl011 - 10.4.52.6)",
+      "hostname": "weblogic1.test.thn.tms.int.pagero.com",
+      "type": "ssh",
+      "group": "test thn",
+      "id": "conn_1736251200052_z2a3b4c5d",
+      "createdAt": "2026-01-07T12:00:00.000Z",
+      "modifiedAt": "2026-01-07T12:00:00.000Z",
+      "connectionSettings": {
+        "sshPort": 22
+      }
+    },
+    {
+      "name": "Nordlo TEST OracleDB (sethnpl013)",
+      "hostname": "10.4.52.7",
+      "type": "ssh",
+      "group": "test thn",
+      "id": "conn_1736251200053_a3b4c5d6e",
+      "createdAt": "2026-01-07T12:00:00.000Z",
+      "modifiedAt": "2026-01-07T12:00:00.000Z",
+      "connectionSettings": {
+        "sshPort": 22
+      }
+    },
+    {
+      "name": "Nordlo PROD Tools (Zetup only)",
+      "hostname": "10.4.48.6",
+      "type": "ssh",
+      "group": "prod thn",
+      "id": "conn_1736251200054_b4c5d6e7f",
+      "createdAt": "2026-01-07T12:00:00.000Z",
+      "modifiedAt": "2026-01-07T12:00:00.000Z",
+      "connectionSettings": {
+        "sshPort": 22
+      }
+    },
+    {
+      "name": "SKF PROD 119 WebLogic primelog",
+      "hostname": "163.157.110.119",
+      "type": "rdp",
+      "group": "prod skf",
+      "id": "conn_1736251200055_c5d6e7f8g",
+      "createdAt": "2026-01-07T12:00:00.000Z",
+      "modifiedAt": "2026-01-07T12:00:00.000Z",
+      "credentialId": "cred_1736251200003_primelog_rdp",
+      "connectionSettings": {
+        "domain": "GOTDMZ"
+      }
+    },
+    {
+      "name": "SKF PROD 109 WebLogic primelog",
+      "hostname": "163.157.110.109",
+      "type": "rdp",
+      "group": "prod skf",
+      "id": "conn_1736251200056_d6e7f8g9h",
+      "createdAt": "2026-01-07T12:00:00.000Z",
+      "modifiedAt": "2026-01-07T12:00:00.000Z",
+      "credentialId": "cred_1736251200003_primelog_rdp"
+    },
+    {
+      "name": "SKF PROD 105 WebLogic primelog",
+      "hostname": "163.157.110.105",
+      "type": "rdp",
+      "group": "prod skf",
+      "id": "conn_1736251200057_e7f8g9h0i",
+      "createdAt": "2026-01-07T12:00:00.000Z",
+      "modifiedAt": "2026-01-07T12:00:00.000Z",
+      "credentialId": "cred_1736251200003_primelog_rdp",
+      "connectionSettings": {
+        "domain": "GOTDMZ"
+      }
+    },
+    {
+      "name": "Nordlo UAT QlikView1 NEW (sethnpl032 - 10.4.52.14)",
+      "hostname": "10.4.52.14",
+      "type": "rdp",
+      "group": "uat thn",
+      "id": "conn_1736251200058_f8g9h0i1j",
+      "createdAt": "2026-01-07T12:00:00.000Z",
+      "modifiedAt": "2026-01-07T12:00:00.000Z",
+      "credentialId": "cred_1736251200001_larsv_rdp"
+    }
+  ],
+  "credentials": [
+    {
+      "name": "larsv (RDP)",
+      "username": "larsv",
+      "password": "",
+      "category": "rdp",
+      "group": "",
+      "hasRootAccess": false,
+      "id": "cred_1736251200001_larsv_rdp",
+      "createdAt": "2026-01-07T12:00:00.000Z",
+      "modifiedAt": "2026-01-07T12:00:00.000Z"
+    },
+    {
+      "name": "larsv (SSH)",
+      "username": "larsv",
+      "password": "",
+      "category": "ssh",
+      "group": "",
+      "hasRootAccess": false,
+      "id": "cred_1736251200002_larsv_ssh",
+      "createdAt": "2026-01-07T12:00:00.000Z",
+      "modifiedAt": "2026-01-07T12:00:00.000Z"
+    },
+    {
+      "name": "primelog (RDP)",
+      "username": "primelog",
+      "password": "",
+      "category": "rdp",
+      "group": "",
+      "hasRootAccess": false,
+      "id": "cred_1736251200003_primelog_rdp",
+      "createdAt": "2026-01-07T12:00:00.000Z",
+      "modifiedAt": "2026-01-07T12:00:00.000Z"
+    }
+  ],
+  "exportedAt": "2026-01-07T12:00:00.000Z",
+  "version": "1.0.0"
+}
+
