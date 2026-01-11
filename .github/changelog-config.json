@@ -1,0 +1,76 @@
+{
+  "categories": [
+    {
+      "title": "## 🚀 Features",
+      "labels": ["feature", "enhancement"]
+    },
+    {
+      "title": "## 🐛 Bug Fixes",
+      "labels": ["bug", "fix"]
+    },
+    {
+      "title": "## 🔧 Maintenance",
+      "labels": ["chore", "maintenance", "refactor"]
+    },
+    {
+      "title": "## 📚 Documentation",
+      "labels": ["documentation", "docs"]
+    },
+    {
+      "title": "## 🔒 Security",
+      "labels": ["security"]
+    },
+    {
+      "title": "## 🧪 Tests",
+      "labels": ["test", "tests"]
+    }
+  ],
+  "ignore_labels": ["ignore-changelog"],
+  "sort": {
+    "order": "ASC",
+    "on_property": "mergedAt"
+  },
+  "template": "#{{CHANGELOG}}\n\n**Full Changelog**: #{{RELEASE_DIFF}}",
+  "pr_template": "- #{{TITLE}} (#{{NUMBER}}) @#{{AUTHOR}}",
+  "empty_template": "No changes since last release.",
+  "transformers": [
+    {
+      "pattern": "^feat(\\(.+\\))?:",
+      "target": "🚀 "
+    },
+    {
+      "pattern": "^fix(\\(.+\\))?:",
+      "target": "🐛 "
+    },
+    {
+      "pattern": "^docs(\\(.+\\))?:",
+      "target": "📚 "
+    },
+    {
+      "pattern": "^chore(\\(.+\\))?:",
+      "target": "🔧 "
+    }
+  ],
+  "max_tags_to_fetch": 200,
+  "max_pull_requests": 200,
+  "max_back_track_time_days": 365,
+  "exclude_merge_branches": ["main"],
+  "label_extractor": [
+    {
+      "pattern": "^feat",
+      "target": "feature"
+    },
+    {
+      "pattern": "^fix",
+      "target": "bug"
+    },
+    {
+      "pattern": "^docs",
+      "target": "documentation"
+    },
+    {
+      "pattern": "^chore",
+      "target": "chore"
+    }
+  ]
+}

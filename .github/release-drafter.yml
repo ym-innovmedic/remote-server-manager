@@ -1,0 +1,80 @@
+name-template: 'v$RESOLVED_VERSION'
+tag-template: 'v$RESOLVED_VERSION'
+categories:
+  - title: '🚀 Features'
+    labels:
+      - 'feature'
+      - 'enhancement'
+  - title: '🐛 Bug Fixes'
+    labels:
+      - 'bug'
+      - 'fix'
+  - title: '🔧 Maintenance'
+    labels:
+      - 'chore'
+      - 'maintenance'
+      - 'refactor'
+  - title: '📚 Documentation'
+    labels:
+      - 'documentation'
+      - 'docs'
+  - title: '🔒 Security'
+    labels:
+      - 'security'
+  - title: '⬆️ Dependencies'
+    labels:
+      - 'dependencies'
+      - 'deps'
+change-template: '- $TITLE (#$NUMBER) @$AUTHOR'
+change-title-escapes: '\<*_&'
+version-resolver:
+  major:
+    labels:
+      - 'major'
+      - 'breaking'
+  minor:
+    labels:
+      - 'minor'
+      - 'feature'
+      - 'enhancement'
+  patch:
+    labels:
+      - 'patch'
+      - 'bug'
+      - 'fix'
+      - 'chore'
+  default: patch
+autolabeler:
+  - label: 'feature'
+    title:
+      - '/^feat(\(.+\))?:/i'
+  - label: 'bug'
+    title:
+      - '/^fix(\(.+\))?:/i'
+  - label: 'documentation'
+    title:
+      - '/^docs(\(.+\))?:/i'
+  - label: 'chore'
+    title:
+      - '/^chore(\(.+\))?:/i'
+  - label: 'refactor'
+    title:
+      - '/^refactor(\(.+\))?:/i'
+  - label: 'test'
+    title:
+      - '/^test(\(.+\))?:/i'
+template: |
+  ## What's Changed
+
+  $CHANGES
+
+  ## Installation
+
+  ### VS Code Marketplace
+  Search for "Remote Server Manager" in VS Code Extensions.
+
+  ### Manual Installation
+  1. Download the `.vsix` file for your platform below
+  2. In VS Code: `Extensions` → `...` → `Install from VSIX`
+
+  **Full Changelog**: https://github.com/$OWNER/$REPOSITORY/compare/$PREVIOUS_TAG...v$RESOLVED_VERSION

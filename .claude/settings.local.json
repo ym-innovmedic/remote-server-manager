@@ -1,0 +1,14 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(npm install:*)",
+      "Bash(npm run compile:*)",
+      "Bash(npm run test:unit:*)",
+      "Bash(npm run lint)",
+      "Bash(code .)",
+      "Bash(security dump-keychain)",
+      "Bash(osascript:*)",
+      "Bash(ls:*)"
+    ]
+  }
+}
