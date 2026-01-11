@@ -53,7 +53,7 @@ jobs:
         run: vsce package --out remote-server-manager-${{ matrix.platform }}.vsix
 
       - name: Upload artifact
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v6
         with:
           name: vsix-${{ matrix.platform }}
           path: remote-server-manager-${{ matrix.platform }}.vsix

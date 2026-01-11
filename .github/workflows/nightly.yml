@@ -75,7 +75,7 @@ jobs:
         run: vsce package --out remote-server-manager-nightly-${{ matrix.platform }}.vsix
 
       - name: Upload artifact
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v6
         with:
           name: vsix-nightly-${{ matrix.platform }}
           path: remote-server-manager-nightly-${{ matrix.platform }}.vsix
