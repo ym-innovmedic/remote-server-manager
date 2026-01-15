@@ -2,7 +2,7 @@
   "name": "remote-server-manager",
   "displayName": "Remote Server Manager",
   "description": "Manage remote server connections (RDP, SSH, SFTP, FTP) using Ansible inventory format. Features auto-login, credential management, and environment labeling.",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "publisher": "prayog",
   "license": "SEE LICENSE IN LICENSE",
   "engines": {
