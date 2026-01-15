@@ -150,6 +150,20 @@
         "title": "Remote Server Manager: Import Ansible Inventory"
       },
       {
+        "command": "remoteServerManager.importSshConfig",
+        "title": "Remote Server Manager: Import SSH Config"
+      },
+      {
+        "command": "remoteServerManager.filterByTags",
+        "title": "Filter by Tags",
+        "icon": "$(tag)"
+      },
+      {
+        "command": "remoteServerManager.clearTagFilter",
+        "title": "Clear Tag Filter",
+        "icon": "$(close)"
+      },
+      {
         "command": "remoteServerManager.exportJson",
         "title": "Remote Server Manager: Export to JSON"
       },
@@ -187,6 +201,11 @@
           "command": "remoteServerManager.addConnection",
           "when": "view == remoteServerManager",
           "group": "navigation@3"
+        },
+        {
+          "command": "remoteServerManager.filterByTags",
+          "when": "view == remoteServerManager",
+          "group": "navigation@4"
         }
       ],
       "view/item/context": [
@@ -270,6 +289,10 @@
           "when": "true"
         },
         {
+          "command": "remoteServerManager.importSshConfig",
+          "when": "true"
+        },
+        {
           "command": "remoteServerManager.exportJson",
           "when": "true"
         },
@@ -287,6 +310,14 @@
         },
         {
           "command": "remoteServerManager.manageCredentials",
+          "when": "true"
+        },
+        {
+          "command": "remoteServerManager.filterByTags",
+          "when": "true"
+        },
+        {
+          "command": "remoteServerManager.clearTagFilter",
           "when": "true"
         }
       ]

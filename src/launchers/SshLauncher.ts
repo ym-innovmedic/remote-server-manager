@@ -27,8 +27,15 @@ export class SshLauncher extends BaseLauncher {
     const config = vscode.workspace.getConfiguration('remoteServerManager');
     const terminalType = config.get<'terminal' | 'integrated'>('defaultSshTerminal', 'terminal');
 
-    // Check if we can use sshpass (password provided and sshpass available)
-    const canUseSshpass = !!(options.password && await this.checkSshpassAvailable());
+    // Key-based auth takes priority - no need for sshpass
+    const useKeyAuth = this.shouldUseKeyAuth(options);
+
+    // Check if we can use sshpass (password provided, no key, and sshpass available)
+    const canUseSshpass = !useKeyAuth && !!(options.password && await this.checkSshpassAvailable());
+
+    if (useKeyAuth) {
+      console.log(`[SshLauncher] Using key-based authentication: ${options.identityFile}`);
+    }
 
     if (terminalType === 'integrated') {
       this.launchInIntegratedTerminal(options, canUseSshpass);
@@ -116,6 +123,21 @@ export class SshLauncher extends BaseLauncher {
   private buildSshCommand(options: ConnectionOptions): string {
     const parts: string[] = ['ssh'];
 
+    // Identity file (SSH key) - takes priority over password
+    if (options.identityFile) {
+      // Verify key file exists
+      if (fs.existsSync(options.identityFile)) {
+        parts.push(`-i "${options.identityFile}"`);
+      } else {
+        console.warn(`[SshLauncher] Identity file not found: ${options.identityFile}`);
+      }
+    }
+
+    // Jump host / ProxyJump
+    if (options.proxyJump) {
+      parts.push(`-J "${options.proxyJump}"`);
+    }
+
     // Port
     const port = options.port || 22;
     if (port !== 22) {
@@ -130,6 +152,13 @@ export class SshLauncher extends BaseLauncher {
     }
 
     return parts.join(' ');
+  }
+
+  /**
+   * Check if connection should use key-based auth
+   */
+  private shouldUseKeyAuth(options: ConnectionOptions): boolean {
+    return !!(options.identityFile && fs.existsSync(options.identityFile));
   }
 
   /**

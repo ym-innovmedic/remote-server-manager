@@ -9,7 +9,7 @@ import { InventoryManager } from './services/InventoryManager';
 import { QuickConnectService } from './services/QuickConnectService';
 import { ImportService } from './services/ImportService';
 import { UsageTrackingService } from './services/UsageTrackingService';
-import { AnsibleHost } from './models/Connection';
+import type { AnsibleHost } from './models/Connection';
 import {
   requiresConnectionConfirmation,
   getEnvironmentWarning,
@@ -71,6 +71,43 @@ export function activate(context: vscode.ExtensionContext): void {
     vscode.commands.registerCommand('remoteServerManager.clearSearch', () => {
       treeProvider.clearSearchFilter();
       void vscode.window.showInformationMessage('Search filter cleared');
+    }),
+
+    // Filter by Tags (v0.2.0)
+    vscode.commands.registerCommand('remoteServerManager.filterByTags', async () => {
+      const allTags = treeProvider.getAllTags();
+
+      if (allTags.length === 0) {
+        void vscode.window.showInformationMessage('No tags found. Add tags to connections using remote_mgr_tags in your inventory.');
+        return;
+      }
+
+      const currentFilter = treeProvider.getTagFilter();
+      const items = allTags.map(tag => ({
+        label: tag,
+        picked: currentFilter.includes(tag.toLowerCase()),
+      }));
+
+      const selected = await vscode.window.showQuickPick(items, {
+        placeHolder: 'Select tags to filter by',
+        canPickMany: true,
+      });
+
+      if (selected !== undefined) {
+        const selectedTags = selected.map(item => item.label);
+        treeProvider.setTagFilter(selectedTags);
+        if (selectedTags.length > 0) {
+          void vscode.window.showInformationMessage(`Filtering by tags: ${selectedTags.join(', ')}`);
+        } else {
+          void vscode.window.showInformationMessage('Tag filter cleared');
+        }
+      }
+    }),
+
+    // Clear Tag Filter (v0.2.0)
+    vscode.commands.registerCommand('remoteServerManager.clearTagFilter', () => {
+      treeProvider.clearTagFilter();
+      void vscode.window.showInformationMessage('Tag filter cleared');
     }),
 
     // Connect commands
@@ -219,6 +256,11 @@ export function activate(context: vscode.ExtensionContext): void {
 
     vscode.commands.registerCommand('remoteServerManager.importAnsible', async () => {
       await importService.importFromAnsible();
+      treeProvider.refresh();
+    }),
+
+    vscode.commands.registerCommand('remoteServerManager.importSshConfig', async () => {
+      await importService.importFromSshConfig();
       treeProvider.refresh();
     }),
 

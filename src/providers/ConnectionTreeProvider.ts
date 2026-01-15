@@ -281,6 +281,22 @@ export class ConnectionTreeItem extends vscode.TreeItem {
       tooltip.appendMarkdown(`\n**Display Name:** ${host.remote_mgr_display_name}\n`);
     }
 
+    // v0.2.0: Show tags if present
+    if (host.remote_mgr_tags && host.remote_mgr_tags.length > 0) {
+      const tagBadges = host.remote_mgr_tags.map(tag => `\`${tag}\``).join(' ');
+      tooltip.appendMarkdown(`\n**Tags:** ${tagBadges}\n`);
+    }
+
+    // v0.2.0: Show SSH key info if present
+    if (host.remote_mgr_identity_file) {
+      tooltip.appendMarkdown(`\n**SSH Key:** \`${host.remote_mgr_identity_file}\`\n`);
+    }
+
+    // v0.2.0: Show jump host if present
+    if (host.remote_mgr_proxy_jump) {
+      tooltip.appendMarkdown(`\n**Jump Host:** \`${host.remote_mgr_proxy_jump}\`\n`);
+    }
+
     // Additional raw variables (show first 5)
     const rawVars = Object.entries(host.rawVariables || {});
     if (rawVars.length > 0) {
@@ -309,6 +325,7 @@ export class ConnectionTreeProvider implements vscode.TreeDataProvider<Connectio
     this._onDidChangeTreeData.event;
 
   private searchFilter: string = '';
+  private tagFilter: string[] = [];
   private usageService?: UsageTrackingService;
 
   constructor(private inventoryManager: InventoryManager) {}
@@ -348,9 +365,72 @@ export class ConnectionTreeProvider implements vscode.TreeDataProvider<Connectio
   }
 
   /**
-   * Check if a host matches the search filter
+   * Set a tag filter (shows only hosts with matching tags)
+   */
+  setTagFilter(tags: string[]): void {
+    this.tagFilter = tags.map(t => t.toLowerCase().trim());
+    this.refresh();
+  }
+
+  /**
+   * Clear the tag filter
+   */
+  clearTagFilter(): void {
+    this.tagFilter = [];
+    this.refresh();
+  }
+
+  /**
+   * Get the current tag filter
+   */
+  getTagFilter(): string[] {
+    return this.tagFilter;
+  }
+
+  /**
+   * Get all unique tags from all hosts in all inventories
+   */
+  getAllTags(): string[] {
+    const tagSet = new Set<string>();
+    const sources = this.inventoryManager.getSources();
+
+    for (const source of sources) {
+      if (!source.inventory) {continue;}
+
+      // Check ungrouped hosts
+      for (const host of source.inventory.ungroupedHosts) {
+        if (host.remote_mgr_tags) {
+          host.remote_mgr_tags.forEach(tag => tagSet.add(tag));
+        }
+      }
+
+      // Check grouped hosts
+      for (const group of source.inventory.groups) {
+        for (const host of group.hosts) {
+          if (host.remote_mgr_tags) {
+            host.remote_mgr_tags.forEach(tag => tagSet.add(tag));
+          }
+        }
+      }
+    }
+
+    return Array.from(tagSet).sort();
+  }
+
+  /**
+   * Check if a host matches the search filter and tag filter
    */
   private hostMatchesFilter(host: AnsibleHost): boolean {
+    // Check tag filter first
+    if (this.tagFilter.length > 0) {
+      const hostTags = (host.remote_mgr_tags || []).map(t => t.toLowerCase());
+      const hasMatchingTag = this.tagFilter.some(filterTag => hostTags.includes(filterTag));
+      if (!hasMatchingTag) {
+        return false;
+      }
+    }
+
+    // Check search filter
     if (!this.searchFilter) {
       return true;
     }
@@ -362,6 +442,8 @@ export class ConnectionTreeProvider implements vscode.TreeDataProvider<Connectio
       host.comment,
       host.ansible_user,
       host.remote_mgr_domain,
+      // v0.2.0: Include tags in search
+      ...(host.remote_mgr_tags || []),
     ].filter(Boolean).map(s => s!.toLowerCase());
 
     return searchTerms.some(term => term.includes(this.searchFilter));

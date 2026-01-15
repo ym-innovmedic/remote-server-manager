@@ -37,6 +37,11 @@ export interface AnsibleHost {
   remote_mgr_port?: number;
   remote_mgr_display_name?: string;
 
+  // v0.2.0: SSH Key and Jump Host support
+  remote_mgr_identity_file?: string; // Path to SSH key (e.g., ~/.ssh/id_rsa)
+  remote_mgr_proxy_jump?: string; // Jump host for SSH (ProxyJump)
+  remote_mgr_tags?: string[]; // User-defined tags for organization
+
   // Preserve all other Ansible variables
   rawVariables: Record<string, string>;
 

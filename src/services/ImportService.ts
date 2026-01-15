@@ -1,10 +1,28 @@
 import * as vscode from 'vscode';
 import * as fs from 'fs';
+import * as os from 'os';
+import * as path from 'path';
 import { InventoryManager } from './InventoryManager';
 import { CredentialService } from './CredentialService';
 import { AnsibleHost, ConnectionType, CredentialStrategy } from '../models/Connection';
 import { JsonCredential } from '../models/Credential';
 import { normalizeGroupName } from '../models/Group';
+
+/**
+ * Parsed SSH config host entry
+ */
+interface SshConfigHost {
+  alias: string;
+  hostname?: string;
+  user?: string;
+  port?: number;
+  identityFile?: string;
+  proxyJump?: string;
+  forwardAgent?: boolean;
+  // Other common options
+  strictHostKeyChecking?: string;
+  userKnownHostsFile?: string;
+}
 
 /**
  * JSON connection format (for import)
@@ -551,5 +569,267 @@ export class ImportService {
         rdpPort: type === 'rdp' ? host.remote_mgr_port : undefined,
       },
     };
+  }
+
+  /**
+   * Import from SSH config file (~/.ssh/config)
+   */
+  async importFromSshConfig(): Promise<ImportResult | undefined> {
+    // Default SSH config path
+    const defaultConfigPath = path.join(os.homedir(), '.ssh', 'config');
+
+    // Ask user to select file or use default
+    const choice = await vscode.window.showQuickPick(
+      [
+        {
+          label: 'Use default (~/.ssh/config)',
+          description: defaultConfigPath,
+          path: defaultConfigPath,
+        },
+        {
+          label: 'Select file...',
+          description: 'Choose a different SSH config file',
+          path: '',
+        },
+      ],
+      { placeHolder: 'Select SSH config file to import' }
+    );
+
+    if (!choice) {
+      return undefined;
+    }
+
+    let configPath = choice.path;
+
+    if (!configPath) {
+      const fileUri = await vscode.window.showOpenDialog({
+        canSelectFiles: true,
+        canSelectFolders: false,
+        canSelectMany: false,
+        filters: {
+          'All files': ['*'],
+        },
+        title: 'Select SSH config file',
+      });
+
+      if (!fileUri || fileUri.length === 0) {
+        return undefined;
+      }
+      configPath = fileUri[0].fsPath;
+    }
+
+    // Check if file exists
+    if (!fs.existsSync(configPath)) {
+      void vscode.window.showErrorMessage(`SSH config file not found: ${configPath}`);
+      return {
+        success: false,
+        connectionsImported: 0,
+        credentialsMigrated: 0,
+        issues: [{ type: 'error', message: `File not found: ${configPath}` }],
+      };
+    }
+
+    try {
+      // Read and parse SSH config
+      const content = fs.readFileSync(configPath, 'utf-8');
+      const hosts = this.parseSshConfig(content);
+
+      if (hosts.length === 0) {
+        void vscode.window.showWarningMessage('No hosts found in SSH config file');
+        return {
+          success: true,
+          connectionsImported: 0,
+          credentialsMigrated: 0,
+          issues: [{ type: 'warning', message: 'No hosts found' }],
+        };
+      }
+
+      // Filter out wildcard and special hosts
+      const validHosts = hosts.filter(
+        (h) => h.alias !== '*' && !h.alias.includes('*') && h.alias !== 'Host'
+      );
+
+      // Show preview
+      const proceed = await vscode.window.showInformationMessage(
+        `Found ${validHosts.length} SSH hosts. Import them?`,
+        { modal: true, detail: validHosts.map((h) => h.alias).join(', ') },
+        'Import',
+        'Cancel'
+      );
+
+      if (proceed !== 'Import') {
+        return undefined;
+      }
+
+      // Get or create editable inventory
+      let source = this.inventoryManager.getEditableSource();
+      if (!source) {
+        const saveUri = await vscode.window.showSaveDialog({
+          defaultUri: vscode.Uri.file('ssh-hosts.ini'),
+          filters: {
+            'Ansible Inventory': ['ini'],
+            'All files': ['*'],
+          },
+          title: 'Create new inventory file for SSH hosts',
+        });
+
+        if (!saveUri) {
+          return undefined;
+        }
+
+        fs.writeFileSync(saveUri.fsPath, '# Imported from SSH config\n');
+        source = await this.inventoryManager.addSource(saveUri.fsPath, false);
+      }
+
+      // Convert and add hosts
+      const issues: ImportIssue[] = [];
+      let imported = 0;
+
+      for (const sshHost of validHosts) {
+        const host = this.convertSshConfigHost(sshHost);
+        this.inventoryManager.addHost(source, host, 'ssh_config');
+        imported++;
+      }
+
+      // Save inventory
+      this.inventoryManager.saveInventoryFile(source);
+
+      void vscode.window.showInformationMessage(
+        `Imported ${imported} SSH hosts from config`
+      );
+
+      return {
+        success: true,
+        connectionsImported: imported,
+        credentialsMigrated: 0,
+        issues,
+      };
+    } catch (error) {
+      void vscode.window.showErrorMessage(`SSH config import failed: ${String(error)}`);
+      return {
+        success: false,
+        connectionsImported: 0,
+        credentialsMigrated: 0,
+        issues: [{ type: 'error', message: String(error) }],
+      };
+    }
+  }
+
+  /**
+   * Parse SSH config file content
+   */
+  private parseSshConfig(content: string): SshConfigHost[] {
+    const hosts: SshConfigHost[] = [];
+    let currentHost: SshConfigHost | null = null;
+
+    const lines = content.split('\n');
+
+    for (const line of lines) {
+      const trimmed = line.trim();
+
+      // Skip empty lines and comments
+      if (!trimmed || trimmed.startsWith('#')) {
+        continue;
+      }
+
+      // Parse key-value pairs (supports both "Key Value" and "Key=Value")
+      const match = trimmed.match(/^(\S+)\s*[=\s]\s*(.+)$/);
+      if (!match) {
+        continue;
+      }
+
+      const [, key, value] = match;
+      const keyLower = key.toLowerCase();
+
+      // New host block
+      if (keyLower === 'host') {
+        // Save previous host
+        if (currentHost) {
+          hosts.push(currentHost);
+        }
+        currentHost = { alias: value.trim() };
+        continue;
+      }
+
+      // Parse host options
+      if (currentHost) {
+        switch (keyLower) {
+          case 'hostname':
+            currentHost.hostname = value.trim();
+            break;
+          case 'user':
+            currentHost.user = value.trim();
+            break;
+          case 'port':
+            currentHost.port = parseInt(value.trim(), 10);
+            break;
+          case 'identityfile':
+            // Expand ~ to home directory
+            currentHost.identityFile = value.trim().replace(/^~/, os.homedir());
+            break;
+          case 'proxyjump':
+            currentHost.proxyJump = value.trim();
+            break;
+          case 'forwardagent':
+            currentHost.forwardAgent = value.trim().toLowerCase() === 'yes';
+            break;
+          case 'stricthostkeychecking':
+            currentHost.strictHostKeyChecking = value.trim();
+            break;
+          case 'userknownhostsfile':
+            currentHost.userKnownHostsFile = value.trim();
+            break;
+        }
+      }
+    }
+
+    // Don't forget the last host
+    if (currentHost) {
+      hosts.push(currentHost);
+    }
+
+    return hosts;
+  }
+
+  /**
+   * Convert SSH config host to Ansible host
+   */
+  private convertSshConfigHost(sshHost: SshConfigHost): AnsibleHost {
+    const host: AnsibleHost = {
+      name: sshHost.alias,
+      rawVariables: {},
+      ansible_connection: 'ssh',
+      remote_mgr_connection_type: 'ssh',
+    };
+
+    // Set hostname/IP if different from alias
+    if (sshHost.hostname && sshHost.hostname !== sshHost.alias) {
+      host.ansible_host = sshHost.hostname;
+    }
+
+    // Set user
+    if (sshHost.user) {
+      host.ansible_user = sshHost.user;
+    }
+
+    // Set port if non-standard
+    if (sshHost.port && sshHost.port !== 22) {
+      host.ansible_port = sshHost.port;
+    }
+
+    // Set identity file (SSH key)
+    if (sshHost.identityFile) {
+      host.remote_mgr_identity_file = sshHost.identityFile;
+    }
+
+    // Set jump host
+    if (sshHost.proxyJump) {
+      host.remote_mgr_proxy_jump = sshHost.proxyJump;
+    }
+
+    // Add source tag
+    host.remote_mgr_tags = ['ssh-config'];
+
+    return host;
   }
 }

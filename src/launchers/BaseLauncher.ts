@@ -13,6 +13,9 @@ export interface ConnectionOptions {
   password?: string;
   domain?: string;
   displayName?: string;
+  // v0.2.0: SSH key and jump host support
+  identityFile?: string; // Path to SSH private key
+  proxyJump?: string; // Jump host for SSH connections
 }
 
 /**

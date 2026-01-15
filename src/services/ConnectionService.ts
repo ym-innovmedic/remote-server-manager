@@ -151,6 +151,9 @@ export class ConnectionService {
             username: result.username,
             password: result.password,
             displayName,
+            // v0.2.0: SSH key and jump host support
+            identityFile: host.remote_mgr_identity_file,
+            proxyJump: host.remote_mgr_proxy_jump,
           });
           break;
         }
@@ -307,6 +310,22 @@ export class ConnectionService {
         description: host.remote_mgr_credential_id || '(none)',
         field: 'credential',
       },
+      // v0.2.0: SSH Key and Jump Host options
+      {
+        label: '$(file) SSH Key File',
+        description: host.remote_mgr_identity_file || '(not set)',
+        field: 'identityFile',
+      },
+      {
+        label: '$(remote) Jump Host',
+        description: host.remote_mgr_proxy_jump || '(not set)',
+        field: 'proxyJump',
+      },
+      {
+        label: '$(tag) Tags',
+        description: host.remote_mgr_tags?.join(', ') || '(none)',
+        field: 'tags',
+      },
     ];
 
     const selected = await vscode.window.showQuickPick(editOptions, {
@@ -437,6 +456,50 @@ export class ConnectionService {
         });
         if (selected) {
           host.remote_mgr_credential_id = selected.id || undefined;
+          changed = true;
+        }
+        break;
+      }
+
+      // v0.2.0: SSH Key File
+      case 'identityFile': {
+        const newKeyFile = await vscode.window.showInputBox({
+          prompt: 'Enter path to SSH private key',
+          value: host.remote_mgr_identity_file || '',
+          placeHolder: 'e.g., ~/.ssh/id_rsa or ~/.ssh/id_ed25519',
+        });
+        if (newKeyFile !== undefined) {
+          host.remote_mgr_identity_file = newKeyFile || undefined;
+          changed = true;
+        }
+        break;
+      }
+
+      // v0.2.0: Jump Host / ProxyJump
+      case 'proxyJump': {
+        const newJumpHost = await vscode.window.showInputBox({
+          prompt: 'Enter jump host (bastion server)',
+          value: host.remote_mgr_proxy_jump || '',
+          placeHolder: 'e.g., bastion.example.com or user@bastion.example.com',
+        });
+        if (newJumpHost !== undefined) {
+          host.remote_mgr_proxy_jump = newJumpHost || undefined;
+          changed = true;
+        }
+        break;
+      }
+
+      // v0.2.0: Tags
+      case 'tags': {
+        const newTags = await vscode.window.showInputBox({
+          prompt: 'Enter tags (comma-separated)',
+          value: host.remote_mgr_tags?.join(', ') || '',
+          placeHolder: 'e.g., web, production, critical',
+        });
+        if (newTags !== undefined) {
+          host.remote_mgr_tags = newTags
+            ? newTags.split(',').map(t => t.trim()).filter(t => t.length > 0)
+            : undefined;
           changed = true;
         }
         break;
