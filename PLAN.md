@@ -110,8 +110,18 @@ Version 0.3.0 adds two major features:
 - [x] Fix all lint errors (24 total)
 - [x] Fix ConnectionTreeProvider cloud source handling
 - [ ] Manual testing of all features
-- [ ] Update README.md
-- [ ] Update CHANGELOG.md
+- [x] Update README.md
+- [x] Update CHANGELOG.md
 - [ ] Run `npm run package`
 - [ ] Test VSIX installation
 - [ ] Tag release
+
+---
+
+## Git Branch
+
+All changes are on branch: `feature/v0.3.0-cloud-and-tunnels`
+
+Commits:
+- `0c53aba` - Update documentation for v0.3.0
+- `8714bdf` - Add v0.3.0 features: AWS/GCP cloud discovery and SSH port forwarding

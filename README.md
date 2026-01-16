@@ -13,6 +13,8 @@
 | Forgetting which server is prod vs dev | **Visual environment indicators** with production warnings |
 | Managing credentials across tools | **Secure credential vault** with environment labels |
 | Maintaining separate server lists | **Use your Ansible inventory** - no duplicate configs |
+| Manually tracking cloud instances | **AWS EC2 & GCP Compute** auto-discovery |
+| Setting up SSH tunnels via command line | **Visual port forwarding** with presets |
 
 ---
 
@@ -49,6 +51,20 @@ Use your existing Ansible inventory files directly - no migration needed. Suppor
 - **Most Connected**: Quick access to your go-to servers
 - **Search**: Find any server instantly
 - **Groups**: Servers organized by Ansible groups
+
+### Cloud Provider Discovery (v0.3.0)
+Automatically discover and connect to cloud instances:
+- **AWS EC2**: Multi-region scanning with profile or manual credentials
+- **GCP Compute**: Zone discovery with ADC or service account authentication
+- **Auto-grouping**: Organize by region, VPC, zone, network, or tags/labels
+- **Live refresh**: Update instance lists on demand
+
+### SSH Port Forwarding (v0.3.0)
+Create SSH tunnels directly from VS Code:
+- **Local Forwarding**: Access remote services on localhost (`-L`)
+- **Dynamic/SOCKS Proxy**: Route traffic through remote host (`-D`)
+- **Service Presets**: One-click setup for MySQL, PostgreSQL, Redis, MongoDB, and more
+- **Tunnel Management**: Visual panel showing all active tunnels with status
 
 ---
 
@@ -186,6 +202,22 @@ Load multiple inventory files, including read-only external ones:
 }
 ```
 
+### AWS EC2 Settings (v0.3.0)
+
+| Setting | Default | Description |
+|---------|---------|-------------|
+| `aws.defaultProfile` | `""` | Default AWS profile from ~/.aws/credentials |
+| `aws.defaultRegions` | `["us-east-1"]` | Default regions to scan |
+| `aws.instanceStateFilter` | `["running"]` | Filter by instance state |
+
+### GCP Compute Settings (v0.3.0)
+
+| Setting | Default | Description |
+|---------|---------|-------------|
+| `gcp.defaultProjectId` | `""` | Default GCP project ID |
+| `gcp.useApplicationDefaultCredentials` | `true` | Use gcloud auth credentials |
+| `gcp.statusFilter` | `["RUNNING"]` | Filter by instance status |
+
 ---
 
 ## Commands
@@ -198,8 +230,14 @@ Access via Command Palette (`Cmd+Shift+P` / `Ctrl+Shift+P`):
 | `Manage Saved Credentials` | View, edit, or delete credentials |
 | `Import from JSON` | Import connections from JSON file |
 | `Import Ansible Inventory` | Import from another inventory |
+| `Import SSH Config` | Import hosts from ~/.ssh/config |
 | `Export to JSON` | Export connections as JSON |
 | `Add Inventory File` | Add a new inventory file |
+| `Add AWS EC2 Source` | Discover EC2 instances from AWS |
+| `Add GCP Compute Source` | Discover VMs from Google Cloud |
+| `Refresh Cloud Sources` | Update cloud instance lists |
+| `Show Active Tunnels` | View and manage SSH tunnels |
+| `Stop All Tunnels` | Close all active port forwards |
 
 ---
 
@@ -216,6 +254,16 @@ Access via Command Palette (`Cmd+Shift+P` / `Ctrl+Shift+P`):
 ```bash
 brew install hudochenkov/sshpass/sshpass
 ```
+
+### For AWS EC2 Discovery (v0.3.0)
+- **AWS CLI** configured with credentials in `~/.aws/credentials`, or
+- **Manual credentials** (Access Key ID + Secret Access Key)
+- Required IAM permissions: `ec2:DescribeInstances`, `ec2:DescribeRegions`
+
+### For GCP Compute Discovery (v0.3.0)
+- **gcloud CLI** with application default credentials (`gcloud auth application-default login`), or
+- **Service Account Key** JSON file
+- Required IAM role: `roles/compute.viewer`
 
 ---
 
