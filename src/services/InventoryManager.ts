@@ -2,36 +2,71 @@ import * as vscode from 'vscode';
 import * as fs from 'fs';
 import * as path from 'path';
 import { AnsibleParser } from '../parsers/AnsibleParser';
-import { AnsibleHost } from '../models/Connection';
+import { AnsibleHost, AnsibleInventory } from '../models/Connection';
 import {
   InventorySource,
+  InventorySourceType,
   InventoryFileConfig,
   normalizeInventoryConfig,
   createInventorySource,
+  createAwsEc2Source,
+  createGcpComputeSource,
 } from '../models/InventorySource';
+import { AwsEc2Config, GcpComputeConfig } from '../models/CloudSource';
+import { AwsEc2DiscoveryService } from './AwsEc2DiscoveryService';
+import { GcpComputeDiscoveryService } from './GcpComputeDiscoveryService';
+import { AwsCredentialProvider } from '../providers/AwsCredentialProvider';
+import { GcpCredentialProvider, GcpCredentials } from '../providers/GcpCredentialProvider';
 
 /**
- * Manages multiple inventory files
+ * Cloud source configuration for storage
+ */
+interface CloudSourceConfig {
+  type: 'aws_ec2' | 'gcp_compute';
+  name: string;
+  config: AwsEc2Config | GcpComputeConfig;
+  profile?: string; // AWS profile
+}
+
+/**
+ * Manages multiple inventory sources (files and cloud)
  */
 export class InventoryManager {
   private sources: InventorySource[] = [];
   private parser: AnsibleParser;
+  private awsCredentialProvider?: AwsCredentialProvider;
+  private gcpCredentialProvider?: GcpCredentialProvider;
+  private awsDiscoveryService?: AwsEc2DiscoveryService;
+  private gcpDiscoveryService?: GcpComputeDiscoveryService;
 
   constructor() {
     this.parser = new AnsibleParser();
   }
 
   /**
-   * Load inventory files from VS Code configuration
+   * Initialize cloud providers (call after extension context is available)
+   */
+  initializeCloudProviders(secretStorage: vscode.SecretStorage): void {
+    this.awsCredentialProvider = new AwsCredentialProvider(secretStorage);
+    this.gcpCredentialProvider = new GcpCredentialProvider(secretStorage);
+    this.awsDiscoveryService = new AwsEc2DiscoveryService();
+    this.gcpDiscoveryService = new GcpComputeDiscoveryService(this.gcpCredentialProvider);
+  }
+
+  /**
+   * Load inventory sources from VS Code configuration
    */
   loadFromConfiguration(): void {
     const config = vscode.workspace.getConfiguration('remoteServerManager');
     const inventoryFiles = config.get<InventoryFileConfig[]>('inventoryFiles', []);
+    const cloudSources = config.get<CloudSourceConfig[]>('cloudSources', []);
 
     console.log('Loading inventory configuration:', JSON.stringify(inventoryFiles));
+    console.log('Loading cloud sources:', JSON.stringify(cloudSources));
 
     this.sources = [];
 
+    // Load file-based inventory sources
     for (const fileConfig of inventoryFiles) {
       const { path: filePath, readOnly } = normalizeInventoryConfig(fileConfig);
       const resolvedPath = this.resolvePath(filePath);
@@ -46,6 +81,29 @@ export class InventoryManager {
       } catch (error) {
         console.error(`Failed to load inventory: ${String(error)}`);
         source.error = `Failed to load: ${String(error)}`;
+      }
+
+      this.sources.push(source);
+    }
+
+    // Load cloud sources (without fetching data - that happens on refresh)
+    for (const cloudConfig of cloudSources) {
+      let source: InventorySource;
+
+      if (cloudConfig.type === 'aws_ec2') {
+        source = createAwsEc2Source(
+          cloudConfig.name,
+          cloudConfig.config as AwsEc2Config,
+          cloudConfig.profile
+        );
+      } else if (cloudConfig.type === 'gcp_compute') {
+        source = createGcpComputeSource(
+          cloudConfig.name,
+          cloudConfig.config as GcpComputeConfig
+        );
+      } else {
+        console.warn(`Unknown cloud source type: ${String(cloudConfig.type)}`);
+        continue;
       }
 
       this.sources.push(source);
@@ -142,10 +200,188 @@ export class InventoryManager {
   /**
    * Refresh all sources
    */
-  refresh(): void {
+  async refresh(): Promise<void> {
     for (const source of this.sources) {
-      this.loadInventoryFile(source);
+      if (source.type === 'file') {
+        this.loadInventoryFile(source);
+      } else {
+        await this.refreshCloudSource(source);
+      }
     }
+  }
+
+  /**
+   * Refresh a specific source by ID
+   */
+  async refreshSource(sourceId: string): Promise<void> {
+    const source = this.sources.find(s => s.id === sourceId);
+    if (!source) {
+      return;
+    }
+
+    if (source.type === 'file') {
+      this.loadInventoryFile(source);
+    } else {
+      await this.refreshCloudSource(source);
+    }
+  }
+
+  /**
+   * Refresh a cloud source
+   */
+  private async refreshCloudSource(source: InventorySource): Promise<void> {
+    try {
+      if (source.type === 'aws_ec2' && source.awsConfig) {
+        await this.refreshAwsSource(source);
+      } else if (source.type === 'gcp_compute' && source.gcpConfig) {
+        await this.refreshGcpSource(source);
+      }
+    } catch (error) {
+      source.error = `Refresh failed: ${error instanceof Error ? error.message : String(error)}`;
+      console.error(`[InventoryManager] Failed to refresh cloud source ${source.name}:`, error);
+    }
+  }
+
+  /**
+   * Refresh AWS EC2 source
+   */
+  private async refreshAwsSource(source: InventorySource): Promise<void> {
+    if (!this.awsCredentialProvider || !this.awsDiscoveryService || !source.awsConfig) {
+      source.error = 'AWS providers not initialized';
+      return;
+    }
+
+    console.log(`[InventoryManager] Refreshing AWS EC2 source: ${source.name}`);
+
+    try {
+      const credentialProvider = await this.awsCredentialProvider.getCredentialProvider(source.awsProfile);
+      const result = await this.awsDiscoveryService.discoverInstances(source.awsConfig, credentialProvider);
+
+      // Convert to AnsibleInventory format
+      const inventory: AnsibleInventory = {
+        groups: result.groups,
+        ungroupedHosts: result.ungroupedHosts,
+        headerComments: [`# AWS EC2 Discovery - ${new Date().toISOString()}`],
+      };
+
+      source.inventory = inventory;
+      source.lastLoaded = new Date();
+      source.error = undefined;
+
+      console.log(`[InventoryManager] AWS EC2 discovered ${result.totalCount} instances`);
+    } catch (error) {
+      source.error = error instanceof Error ? error.message : String(error);
+      throw error;
+    }
+  }
+
+  /**
+   * Refresh GCP Compute source
+   */
+  private async refreshGcpSource(source: InventorySource): Promise<void> {
+    if (!this.gcpCredentialProvider || !this.gcpDiscoveryService || !source.gcpConfig) {
+      source.error = 'GCP providers not initialized';
+      return;
+    }
+
+    console.log(`[InventoryManager] Refreshing GCP Compute source: ${source.name}`);
+
+    try {
+      const credentials: GcpCredentials = {
+        projectId: source.gcpConfig.projectId,
+        useAdc: source.gcpConfig.useApplicationDefaultCredentials ?? true,
+        keyFilePath: source.gcpConfig.keyFilePath,
+      };
+
+      const result = await this.gcpDiscoveryService.discoverInstances(source.gcpConfig, credentials);
+
+      // Convert to AnsibleInventory format
+      const inventory: AnsibleInventory = {
+        groups: result.groups,
+        ungroupedHosts: result.ungroupedHosts,
+        headerComments: [`# GCP Compute Discovery - ${new Date().toISOString()}`],
+      };
+
+      source.inventory = inventory;
+      source.lastLoaded = new Date();
+      source.error = undefined;
+
+      console.log(`[InventoryManager] GCP Compute discovered ${result.totalCount} instances`);
+    } catch (error) {
+      source.error = error instanceof Error ? error.message : String(error);
+      throw error;
+    }
+  }
+
+  /**
+   * Add an AWS EC2 source
+   */
+  async addAwsEc2Source(
+    name: string,
+    config: AwsEc2Config,
+    profile?: string
+  ): Promise<InventorySource> {
+    const source = createAwsEc2Source(name, config, profile);
+    this.sources.push(source);
+
+    // Refresh to get initial data
+    await this.refreshCloudSource(source);
+
+    // Update configuration
+    await this.updateConfiguration();
+
+    return source;
+  }
+
+  /**
+   * Add a GCP Compute source
+   */
+  async addGcpComputeSource(
+    name: string,
+    config: GcpComputeConfig
+  ): Promise<InventorySource> {
+    const source = createGcpComputeSource(name, config);
+    this.sources.push(source);
+
+    // Refresh to get initial data
+    await this.refreshCloudSource(source);
+
+    // Update configuration
+    await this.updateConfiguration();
+
+    return source;
+  }
+
+  /**
+   * Remove a source by ID
+   */
+  async removeSourceById(sourceId: string): Promise<void> {
+    const index = this.sources.findIndex(s => s.id === sourceId);
+    if (index !== -1) {
+      this.sources.splice(index, 1);
+      await this.updateConfiguration();
+    }
+  }
+
+  /**
+   * Get AWS credential provider
+   */
+  getAwsCredentialProvider(): AwsCredentialProvider | undefined {
+    return this.awsCredentialProvider;
+  }
+
+  /**
+   * Get GCP credential provider
+   */
+  getGcpCredentialProvider(): GcpCredentialProvider | undefined {
+    return this.gcpCredentialProvider;
+  }
+
+  /**
+   * Get sources by type
+   */
+  getSourcesByType(type: InventorySourceType): InventorySource[] {
+    return this.sources.filter(s => s.type === type);
   }
 
   /**
@@ -296,16 +532,45 @@ export class InventoryManager {
    */
   private async updateConfiguration(): Promise<void> {
     const config = vscode.workspace.getConfiguration('remoteServerManager');
-    const inventoryFiles: InventoryFileConfig[] = this.sources.map((s) => {
-      if (s.readOnly) {
-        return { path: s.path, readOnly: true };
+
+    // Build file inventory list
+    const inventoryFiles: InventoryFileConfig[] = this.sources
+      .filter(s => s.type === 'file')
+      .map((s) => {
+        if (s.readOnly) {
+          return { path: s.path, readOnly: true };
+        }
+        return s.path;
+      });
+
+    // Build cloud sources list
+    const cloudSources: CloudSourceConfig[] = [];
+    for (const s of this.sources) {
+      if (s.type === 'aws_ec2' && s.awsConfig) {
+        cloudSources.push({
+          type: 'aws_ec2',
+          name: s.name,
+          config: s.awsConfig,
+          profile: s.awsProfile,
+        });
+      } else if (s.type === 'gcp_compute' && s.gcpConfig) {
+        cloudSources.push({
+          type: 'gcp_compute',
+          name: s.name,
+          config: s.gcpConfig,
+        });
       }
-      return s.path;
-    });
+    }
 
     await config.update(
       'inventoryFiles',
       inventoryFiles,
+      vscode.ConfigurationTarget.Global
+    );
+
+    await config.update(
+      'cloudSources',
+      cloudSources,
       vscode.ConfigurationTarget.Global
     );
   }

@@ -1,8 +1,8 @@
 {
   "name": "remote-server-manager",
   "displayName": "Remote Server Manager",
-  "description": "Manage remote server connections (RDP, SSH, SFTP, FTP) using Ansible inventory format. Features auto-login, credential management, and environment labeling.",
-  "version": "0.2.0",
+  "description": "Manage remote server connections (RDP, SSH, SFTP, FTP) with AWS EC2 and GCP Compute discovery. Features SSH port forwarding, cloud provider integration, auto-login, credential management, and environment labeling.",
+  "version": "0.3.0",
   "publisher": "prayog",
   "license": "SEE LICENSE IN LICENSE",
   "engines": {
@@ -38,7 +38,13 @@
     "macos",
     "terminal",
     "remote desktop",
-    "credential manager"
+    "credential manager",
+    "aws",
+    "ec2",
+    "gcp",
+    "cloud",
+    "port forwarding",
+    "ssh tunnel"
   ],
   "activationEvents": [
     "onView:remoteServerManager"
@@ -60,6 +66,11 @@
           "id": "remoteServerManager",
           "name": "Connections",
           "icon": "resources/icons/remote.svg"
+        },
+        {
+          "id": "remoteServerManager.portForwarding",
+          "name": "Port Forwarding",
+          "icon": "$(plug)"
         }
       ]
     },
@@ -183,6 +194,59 @@
       {
         "command": "remoteServerManager.manageCredentials",
         "title": "Remote Server Manager: Manage Saved Credentials"
+      },
+      {
+        "command": "remoteServerManager.addAwsEc2Source",
+        "title": "Remote Server Manager: Add AWS EC2 Source",
+        "icon": "$(cloud)"
+      },
+      {
+        "command": "remoteServerManager.addGcpComputeSource",
+        "title": "Remote Server Manager: Add GCP Compute Source",
+        "icon": "$(cloud)"
+      },
+      {
+        "command": "remoteServerManager.refreshCloudSources",
+        "title": "Remote Server Manager: Refresh Cloud Sources",
+        "icon": "$(sync)"
+      },
+      {
+        "command": "remoteServerManager.removeCloudSource",
+        "title": "Remove Cloud Source"
+      },
+      {
+        "command": "remoteServerManager.createLocalForward",
+        "title": "Create Local Port Forward"
+      },
+      {
+        "command": "remoteServerManager.createDynamicForward",
+        "title": "Create SOCKS Proxy"
+      },
+      {
+        "command": "remoteServerManager.stopTunnel",
+        "title": "Stop Tunnel"
+      },
+      {
+        "command": "remoteServerManager.stopAllTunnels",
+        "title": "Stop All Tunnels",
+        "icon": "$(stop-circle)"
+      },
+      {
+        "command": "remoteServerManager.restartTunnel",
+        "title": "Restart Tunnel"
+      },
+      {
+        "command": "remoteServerManager.showActiveTunnels",
+        "title": "Remote Server Manager: Show Active Tunnels"
+      },
+      {
+        "command": "remoteServerManager.viewTunnelDetails",
+        "title": "View Tunnel Details"
+      },
+      {
+        "command": "remoteServerManager.refreshTunnels",
+        "title": "Refresh Tunnels",
+        "icon": "$(refresh)"
       }
     ],
     "menus": {
@@ -206,6 +270,16 @@
           "command": "remoteServerManager.filterByTags",
           "when": "view == remoteServerManager",
           "group": "navigation@4"
+        },
+        {
+          "command": "remoteServerManager.refreshTunnels",
+          "when": "view == remoteServerManager.portForwarding",
+          "group": "navigation@1"
+        },
+        {
+          "command": "remoteServerManager.stopAllTunnels",
+          "when": "view == remoteServerManager.portForwarding",
+          "group": "navigation@2"
         }
       ],
       "view/item/context": [
@@ -273,6 +347,41 @@
           "command": "remoteServerManager.deleteConnection",
           "when": "view == remoteServerManager && viewItem =~ /connection/",
           "group": "4_edit@2"
+        },
+        {
+          "command": "remoteServerManager.createLocalForward",
+          "when": "view == remoteServerManager && viewItem =~ /connection/",
+          "group": "5_tunnel@1"
+        },
+        {
+          "command": "remoteServerManager.createDynamicForward",
+          "when": "view == remoteServerManager && viewItem =~ /connection/",
+          "group": "5_tunnel@2"
+        },
+        {
+          "command": "remoteServerManager.removeCloudSource",
+          "when": "view == remoteServerManager && viewItem == cloudSource",
+          "group": "9_delete@1"
+        },
+        {
+          "command": "remoteServerManager.stopTunnel",
+          "when": "view == remoteServerManager.portForwarding && viewItem == tunnel",
+          "group": "1_tunnel@1"
+        },
+        {
+          "command": "remoteServerManager.restartTunnel",
+          "when": "view == remoteServerManager.portForwarding && viewItem == tunnel",
+          "group": "1_tunnel@2"
+        },
+        {
+          "command": "remoteServerManager.viewTunnelDetails",
+          "when": "view == remoteServerManager.portForwarding && viewItem == tunnel",
+          "group": "2_info@1"
+        },
+        {
+          "command": "remoteServerManager.stopAllTunnels",
+          "when": "view == remoteServerManager.portForwarding && viewItem == tunnelGroup",
+          "group": "1_tunnel@1"
         }
       ],
       "commandPalette": [
@@ -318,6 +427,26 @@
         },
         {
           "command": "remoteServerManager.clearTagFilter",
+          "when": "true"
+        },
+        {
+          "command": "remoteServerManager.addAwsEc2Source",
+          "when": "true"
+        },
+        {
+          "command": "remoteServerManager.addGcpComputeSource",
+          "when": "true"
+        },
+        {
+          "command": "remoteServerManager.refreshCloudSources",
+          "when": "true"
+        },
+        {
+          "command": "remoteServerManager.showActiveTunnels",
+          "when": "true"
+        },
+        {
+          "command": "remoteServerManager.stopAllTunnels",
           "when": "true"
         }
       ]
@@ -409,6 +538,71 @@
           "type": "boolean",
           "default": true,
           "description": "Automatically click 'Continue' on RDP certificate dialogs. Only applies when rdpAutoLogin is enabled."
+        },
+        "remoteServerManager.cloudSources": {
+          "type": "array",
+          "default": [],
+          "description": "Cloud sources for discovering servers (AWS EC2, GCP Compute).",
+          "items": {
+            "type": "object",
+            "properties": {
+              "type": {
+                "type": "string",
+                "enum": ["aws_ec2", "gcp_compute"]
+              },
+              "name": {
+                "type": "string"
+              },
+              "config": {
+                "type": "object"
+              },
+              "profile": {
+                "type": "string"
+              }
+            },
+            "required": ["type", "name", "config"]
+          }
+        },
+        "remoteServerManager.aws.defaultProfile": {
+          "type": "string",
+          "default": "",
+          "description": "Default AWS profile to use for EC2 discovery."
+        },
+        "remoteServerManager.aws.defaultRegions": {
+          "type": "array",
+          "default": ["us-east-1"],
+          "description": "Default AWS regions to scan for EC2 instances.",
+          "items": {
+            "type": "string"
+          }
+        },
+        "remoteServerManager.aws.instanceStateFilter": {
+          "type": "array",
+          "default": ["running"],
+          "description": "Filter EC2 instances by state.",
+          "items": {
+            "type": "string",
+            "enum": ["pending", "running", "shutting-down", "terminated", "stopping", "stopped"]
+          }
+        },
+        "remoteServerManager.gcp.defaultProjectId": {
+          "type": "string",
+          "default": "",
+          "description": "Default GCP project ID for Compute Engine discovery."
+        },
+        "remoteServerManager.gcp.useApplicationDefaultCredentials": {
+          "type": "boolean",
+          "default": true,
+          "description": "Use Application Default Credentials (gcloud auth) for GCP."
+        },
+        "remoteServerManager.gcp.statusFilter": {
+          "type": "array",
+          "default": ["RUNNING"],
+          "description": "Filter GCP instances by status.",
+          "items": {
+            "type": "string",
+            "enum": ["PROVISIONING", "STAGING", "RUNNING", "STOPPING", "STOPPED", "SUSPENDING", "SUSPENDED", "TERMINATED"]
+          }
         }
       }
     }
@@ -446,5 +640,11 @@
     "typescript": "^5.3.2",
     "webpack": "^5.89.0",
     "webpack-cli": "^5.1.4"
+  },
+  "dependencies": {
+    "@aws-sdk/client-ec2": "^3.969.0",
+    "@aws-sdk/client-sts": "^3.969.0",
+    "@aws-sdk/credential-providers": "^3.969.0",
+    "@google-cloud/compute": "^6.6.0"
   }
 }

@@ -29,6 +29,7 @@ export class ConnectionTreeItem extends vscode.TreeItem {
   public serverEnvironment?: ServerEnvironment;
   public usageCount?: number;
   public isFavorite?: boolean;
+  public sourceId?: string;
 
   constructor(
     public readonly label: string,
@@ -59,16 +60,35 @@ export class ConnectionTreeItem extends vscode.TreeItem {
 
   private setupInventoryItem(): void {
     const source = this.data as InventorySource | undefined;
-    // Purple/magenta for inventory files
-    this.iconPath = new vscode.ThemeIcon('folder-library', new vscode.ThemeColor('terminal.ansiMagenta'));
     if (!source) {
+      this.iconPath = new vscode.ThemeIcon('folder-library', new vscode.ThemeColor('terminal.ansiMagenta'));
       return;
     }
-    if (source.readOnly) {
-      this.description = '(read-only)';
-      // Yellow lock icon for read-only
-      this.iconPath = new vscode.ThemeIcon('lock', new vscode.ThemeColor('terminal.ansiYellow'));
+
+    // Set sourceId for cloud source removal
+    this.sourceId = source.id;
+
+    // Handle different source types
+    if (source.type === 'aws_ec2') {
+      // AWS EC2 cloud source - orange cloud icon
+      this.iconPath = new vscode.ThemeIcon('cloud', new vscode.ThemeColor('terminal.ansiYellow'));
+      this.contextValue = 'cloudSource';
+      this.description = source.error || 'AWS EC2';
+    } else if (source.type === 'gcp_compute') {
+      // GCP Compute cloud source - blue cloud icon
+      this.iconPath = new vscode.ThemeIcon('cloud', new vscode.ThemeColor('terminal.ansiBrightBlue'));
+      this.contextValue = 'cloudSource';
+      this.description = source.error || 'GCP Compute';
+    } else {
+      // File-based inventory source
+      this.iconPath = new vscode.ThemeIcon('folder-library', new vscode.ThemeColor('terminal.ansiMagenta'));
+      if (source.readOnly) {
+        this.description = '(read-only)';
+        this.iconPath = new vscode.ThemeIcon('lock', new vscode.ThemeColor('terminal.ansiYellow'));
+      }
     }
+
+    // Override icon for error state
     if (source.error) {
       this.iconPath = new vscode.ThemeIcon('error', new vscode.ThemeColor('terminal.ansiRed'));
       this.description = source.error;

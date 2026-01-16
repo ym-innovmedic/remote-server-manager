@@ -9,7 +9,11 @@ import { InventoryManager } from './services/InventoryManager';
 import { QuickConnectService } from './services/QuickConnectService';
 import { ImportService } from './services/ImportService';
 import { UsageTrackingService } from './services/UsageTrackingService';
+import { PortForwardingService } from './services/PortForwardingService';
+import { PortForwardingTreeProvider, PortForwardingTreeItem } from './providers/PortForwardingTreeProvider';
 import type { AnsibleHost } from './models/Connection';
+import type { PortForward } from './models/PortForward';
+import { AwsEc2Config, GcpComputeConfig } from './models/CloudSource';
 import {
   requiresConnectionConfirmation,
   getEnvironmentWarning,
@@ -20,6 +24,8 @@ let connectionService: ConnectionService;
 let inventoryManager: InventoryManager;
 let treeProvider: ConnectionTreeProvider;
 let usageTrackingService: UsageTrackingService;
+let portForwardingService: PortForwardingService;
+let portForwardingTreeProvider: PortForwardingTreeProvider;
 
 export function activate(context: vscode.ExtensionContext): void {
   console.log('Remote Server Manager is now active');
@@ -27,23 +33,33 @@ export function activate(context: vscode.ExtensionContext): void {
   // Initialize services
   credentialService = new CredentialService(context.secrets);
   inventoryManager = new InventoryManager();
+  inventoryManager.initializeCloudProviders(context.secrets);
   connectionService = new ConnectionService(inventoryManager, credentialService);
   usageTrackingService = new UsageTrackingService(context.globalState);
+  portForwardingService = new PortForwardingService();
   const quickConnectService = new QuickConnectService(connectionService, credentialService);
   const importService = new ImportService(inventoryManager, credentialService);
 
-  // Initialize tree view with usage tracking
+  // Initialize tree views
   treeProvider = new ConnectionTreeProvider(inventoryManager);
   treeProvider.setUsageTrackingService(usageTrackingService);
+  portForwardingTreeProvider = new PortForwardingTreeProvider(portForwardingService);
 
   const treeView = vscode.window.createTreeView('remoteServerManager', {
     treeDataProvider: treeProvider,
     showCollapseAll: true,
   });
 
+  const portForwardingTreeView = vscode.window.createTreeView('remoteServerManager.portForwarding', {
+    treeDataProvider: portForwardingTreeProvider,
+    showCollapseAll: true,
+  });
+
   // Register commands
   context.subscriptions.push(
     treeView,
+    portForwardingTreeView,
+    portForwardingService,
 
     // Refresh
     vscode.commands.registerCommand('remoteServerManager.refresh', () => {
@@ -350,6 +366,294 @@ export function activate(context: vscode.ExtensionContext): void {
         await credentialService.deleteCredential(selected.credential.id);
         void vscode.window.showInformationMessage('Credential deleted');
       }
+    }),
+
+    // AWS EC2 Source (v0.3.0)
+    vscode.commands.registerCommand('remoteServerManager.addAwsEc2Source', async () => {
+      const awsCredentialProvider = inventoryManager.getAwsCredentialProvider();
+      if (!awsCredentialProvider) {
+        void vscode.window.showErrorMessage('AWS credential provider not initialized');
+        return;
+      }
+
+      // Select profile
+      const profileName = await awsCredentialProvider.promptForProfile();
+      if (!profileName) {
+        return;
+      }
+
+      // Handle manual credentials
+      if (profileName === '__manual__') {
+        const credentials = await awsCredentialProvider.promptForCredentials();
+        if (!credentials) {
+          return;
+        }
+        await awsCredentialProvider.storeCredentials(credentials);
+      }
+
+      // Select regions
+      const regions = await awsCredentialProvider.promptForRegions(true);
+      if (!regions || regions.length === 0) {
+        return;
+      }
+
+      // Get source name
+      const sourceName = await vscode.window.showInputBox({
+        prompt: 'Enter a name for this AWS EC2 source',
+        value: `AWS EC2 (${regions.join(', ')})`,
+      });
+
+      if (!sourceName) {
+        return;
+      }
+
+      // Get settings
+      const config = vscode.workspace.getConfiguration('remoteServerManager');
+      const instanceStateFilter = config.get<string[]>('aws.instanceStateFilter', ['running']);
+
+      const awsConfig: AwsEc2Config = {
+        type: 'aws-ec2',
+        region: regions[0],
+        regions,
+        instanceStateFilter,
+      };
+
+      try {
+        await vscode.window.withProgress({
+          location: vscode.ProgressLocation.Notification,
+          title: 'Discovering AWS EC2 instances...',
+          cancellable: false,
+        }, async () => {
+          await inventoryManager.addAwsEc2Source(sourceName, awsConfig, profileName === '__manual__' ? undefined : profileName);
+        });
+        treeProvider.refresh();
+        void vscode.window.showInformationMessage(`Added AWS EC2 source: ${sourceName}`);
+      } catch (error) {
+        void vscode.window.showErrorMessage(`Failed to add AWS EC2 source: ${error instanceof Error ? error.message : String(error)}`);
+      }
+    }),
+
+    // GCP Compute Source (v0.3.0)
+    vscode.commands.registerCommand('remoteServerManager.addGcpComputeSource', async () => {
+      const gcpCredentialProvider = inventoryManager.getGcpCredentialProvider();
+      if (!gcpCredentialProvider) {
+        void vscode.window.showErrorMessage('GCP credential provider not initialized');
+        return;
+      }
+
+      // Select authentication method
+      const authMethod = await gcpCredentialProvider.promptForAuthMethod();
+      if (!authMethod) {
+        return;
+      }
+
+      let keyFilePath: string | undefined;
+      if (authMethod === 'service-account') {
+        keyFilePath = await gcpCredentialProvider.promptForKeyFile();
+        if (!keyFilePath) {
+          return;
+        }
+      }
+
+      // Select project
+      const projectId = await gcpCredentialProvider.promptForProject();
+      if (!projectId) {
+        return;
+      }
+
+      // Get source name
+      const sourceName = await vscode.window.showInputBox({
+        prompt: 'Enter a name for this GCP Compute source',
+        value: `GCP Compute (${projectId})`,
+      });
+
+      if (!sourceName) {
+        return;
+      }
+
+      // Get settings
+      const config = vscode.workspace.getConfiguration('remoteServerManager');
+      const statusFilter = config.get<string[]>('gcp.statusFilter', ['RUNNING']);
+
+      const gcpConfig: GcpComputeConfig = {
+        type: 'gcp-compute',
+        projectId,
+        useApplicationDefaultCredentials: authMethod === 'adc',
+        keyFilePath,
+        statusFilter,
+      };
+
+      try {
+        await vscode.window.withProgress({
+          location: vscode.ProgressLocation.Notification,
+          title: 'Discovering GCP Compute instances...',
+          cancellable: false,
+        }, async () => {
+          await inventoryManager.addGcpComputeSource(sourceName, gcpConfig);
+        });
+        treeProvider.refresh();
+        void vscode.window.showInformationMessage(`Added GCP Compute source: ${sourceName}`);
+      } catch (error) {
+        void vscode.window.showErrorMessage(`Failed to add GCP Compute source: ${error instanceof Error ? error.message : String(error)}`);
+      }
+    }),
+
+    // Refresh cloud sources (v0.3.0)
+    vscode.commands.registerCommand('remoteServerManager.refreshCloudSources', async () => {
+      await vscode.window.withProgress({
+        location: vscode.ProgressLocation.Notification,
+        title: 'Refreshing cloud sources...',
+        cancellable: false,
+      }, async () => {
+        await inventoryManager.refresh();
+      });
+      treeProvider.refresh();
+      void vscode.window.showInformationMessage('Cloud sources refreshed');
+    }),
+
+    // Remove cloud source (v0.3.0)
+    vscode.commands.registerCommand('remoteServerManager.removeCloudSource', async (item: ConnectionTreeItem) => {
+      if (item.sourceId) {
+        const confirm = await vscode.window.showWarningMessage(
+          `Remove cloud source "${item.label}"?`,
+          { modal: true },
+          'Remove'
+        );
+        if (confirm === 'Remove') {
+          await inventoryManager.removeSourceById(item.sourceId);
+          treeProvider.refresh();
+          void vscode.window.showInformationMessage('Cloud source removed');
+        }
+      }
+    }),
+
+    // Port forwarding commands (v0.3.0)
+    vscode.commands.registerCommand('remoteServerManager.createLocalForward', async (item: ConnectionTreeItem) => {
+      const host = item.data as AnsibleHost;
+      if (!host) {
+        return;
+      }
+
+      const config = await portForwardingService.promptLocalForward(host);
+      if (!config) {
+        return;
+      }
+
+      try {
+        const tunnel = await portForwardingService.createLocalForward(config);
+        void vscode.window.showInformationMessage(
+          `Tunnel created: localhost:${tunnel.localPort} → ${tunnel.remoteHost}:${tunnel.remotePort}`
+        );
+      } catch (error) {
+        void vscode.window.showErrorMessage(
+          `Failed to create tunnel: ${error instanceof Error ? error.message : String(error)}`
+        );
+      }
+    }),
+
+    vscode.commands.registerCommand('remoteServerManager.createDynamicForward', async (item: ConnectionTreeItem) => {
+      const host = item.data as AnsibleHost;
+      if (!host) {
+        return;
+      }
+
+      const config = await portForwardingService.promptDynamicForward(host);
+      if (!config) {
+        return;
+      }
+
+      try {
+        const tunnel = await portForwardingService.createDynamicForward(config);
+        void vscode.window.showInformationMessage(
+          `SOCKS proxy created on localhost:${tunnel.localPort}`
+        );
+      } catch (error) {
+        void vscode.window.showErrorMessage(
+          `Failed to create SOCKS proxy: ${error instanceof Error ? error.message : String(error)}`
+        );
+      }
+    }),
+
+    vscode.commands.registerCommand('remoteServerManager.stopTunnel', async (item: PortForwardingTreeItem) => {
+      if (item.tunnel) {
+        await portForwardingService.stopTunnel(item.tunnel.id);
+        void vscode.window.showInformationMessage(`Tunnel "${item.tunnel.name}" stopped`);
+      }
+    }),
+
+    vscode.commands.registerCommand('remoteServerManager.stopAllTunnels', async () => {
+      const count = portForwardingService.getActiveTunnelCount();
+      if (count === 0) {
+        void vscode.window.showInformationMessage('No active tunnels');
+        return;
+      }
+
+      const confirm = await vscode.window.showWarningMessage(
+        `Stop all ${count} active tunnel${count !== 1 ? 's' : ''}?`,
+        { modal: true },
+        'Stop All'
+      );
+
+      if (confirm === 'Stop All') {
+        await portForwardingService.stopAllTunnels();
+        void vscode.window.showInformationMessage('All tunnels stopped');
+      }
+    }),
+
+    vscode.commands.registerCommand('remoteServerManager.restartTunnel', async (item: PortForwardingTreeItem) => {
+      if (item.tunnel) {
+        const tunnel = await portForwardingService.restartTunnel(item.tunnel.id);
+        if (tunnel) {
+          void vscode.window.showInformationMessage(`Tunnel "${tunnel.name}" restarted`);
+        }
+      }
+    }),
+
+    vscode.commands.registerCommand('remoteServerManager.showActiveTunnels', () => {
+      const tunnels = portForwardingService.getActiveTunnels();
+      if (tunnels.length === 0) {
+        void vscode.window.showInformationMessage('No active tunnels');
+        return;
+      }
+
+      const items = tunnels.map(t => ({
+        label: t.name,
+        description: `${t.status} - localhost:${t.localPort}`,
+        detail: t.type === 'local' ? `→ ${t.remoteHost}:${t.remotePort}` : t.type,
+        tunnel: t,
+      }));
+
+      void vscode.window.showQuickPick(items, {
+        placeHolder: `${tunnels.length} active tunnel${tunnels.length !== 1 ? 's' : ''}`,
+      });
+    }),
+
+    vscode.commands.registerCommand('remoteServerManager.viewTunnelDetails', (tunnel: PortForward) => {
+      const details = [
+        `Name: ${tunnel.name}`,
+        `Type: ${tunnel.type}`,
+        `Status: ${tunnel.status}`,
+        `SSH Host: ${tunnel.sshHost}`,
+        `Local Port: ${tunnel.localPort}`,
+      ];
+
+      if (tunnel.type === 'local' || tunnel.type === 'remote') {
+        details.push(`Remote: ${tunnel.remoteHost}:${tunnel.remotePort}`);
+      }
+
+      if (tunnel.startedAt) {
+        details.push(`Started: ${tunnel.startedAt.toLocaleString()}`);
+      }
+
+      if (tunnel.errorMessage) {
+        details.push(`Error: ${tunnel.errorMessage}`);
+      }
+
+      void vscode.window.showInformationMessage(details.join('\n'));
+    }),
+
+    vscode.commands.registerCommand('remoteServerManager.refreshTunnels', () => {
+      portForwardingTreeProvider.refresh();
     })
   );
 

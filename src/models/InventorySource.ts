@@ -1,16 +1,28 @@
 import { AnsibleInventory } from './Connection';
+import { AwsEc2Config, GcpComputeConfig } from './CloudSource';
 
 /**
- * Represents the source of an inventory file
+ * Source type
+ */
+export type InventorySourceType = 'file' | 'aws_ec2' | 'gcp_compute';
+
+/**
+ * Represents the source of an inventory
  */
 export interface InventorySource {
-  /** File path */
+  /** Unique identifier for this source */
+  id: string;
+
+  /** Source type */
+  type: InventorySourceType;
+
+  /** File path (for file sources) */
   path: string;
 
-  /** Display name (filename) */
+  /** Display name */
   name: string;
 
-  /** Whether the file is read-only */
+  /** Whether the source is read-only */
   readOnly: boolean;
 
   /** Parsed inventory data */
@@ -21,6 +33,18 @@ export interface InventorySource {
 
   /** Load error if any */
   error?: string;
+
+  /** AWS EC2 configuration (for aws_ec2 type) */
+  awsConfig?: AwsEc2Config;
+
+  /** GCP Compute configuration (for gcp_compute type) */
+  gcpConfig?: GcpComputeConfig;
+
+  /** AWS profile name (for aws_ec2 type) */
+  awsProfile?: string;
+
+  /** GCP credentials (stored separately in secrets) */
+  gcpProjectId?: string;
 }
 
 /**
@@ -52,16 +76,64 @@ export function getInventoryDisplayName(path: string): string {
 }
 
 /**
- * Create an empty inventory source
+ * Generate a unique source ID
+ */
+export function generateSourceId(): string {
+  return `${Date.now()}-${Math.random().toString(36).substring(2, 9)}`;
+}
+
+/**
+ * Create an empty file inventory source
  */
 export function createInventorySource(
   path: string,
   readOnly: boolean = false
 ): InventorySource {
   return {
+    id: generateSourceId(),
+    type: 'file',
     path,
     name: getInventoryDisplayName(path),
     readOnly,
     inventory: null,
+  };
+}
+
+/**
+ * Create an AWS EC2 inventory source
+ */
+export function createAwsEc2Source(
+  name: string,
+  config: AwsEc2Config,
+  profile?: string
+): InventorySource {
+  return {
+    id: generateSourceId(),
+    type: 'aws_ec2',
+    path: '', // Not used for cloud sources
+    name,
+    readOnly: true, // Cloud sources are always read-only
+    inventory: null,
+    awsConfig: config,
+    awsProfile: profile,
+  };
+}
+
+/**
+ * Create a GCP Compute inventory source
+ */
+export function createGcpComputeSource(
+  name: string,
+  config: GcpComputeConfig
+): InventorySource {
+  return {
+    id: generateSourceId(),
+    type: 'gcp_compute',
+    path: '', // Not used for cloud sources
+    name,
+    readOnly: true, // Cloud sources are always read-only
+    inventory: null,
+    gcpConfig: config,
+    gcpProjectId: config.projectId,
   };
 }
