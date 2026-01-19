@@ -62,7 +62,7 @@ export class SftpLauncher extends BaseLauncher {
     options: ConnectionOptions,
     useSshpass: boolean
   ): Promise<void> {
-    const sftpCommand = this.buildSftpCommand(options);
+    const sftpCommand = this.buildSftpCommand(options, useSshpass);
 
     let command: string;
     if (useSshpass && options.password) {
@@ -92,7 +92,7 @@ export class SftpLauncher extends BaseLauncher {
     useSshpass: boolean
   ): void {
     const terminalName = `SFTP: ${options.displayName || options.hostname}`;
-    const sftpCommand = this.buildSftpCommand(options);
+    const sftpCommand = this.buildSftpCommand(options, useSshpass);
 
     if (useSshpass && options.password) {
       // Create terminal with SSHPASS env var set invisibly
@@ -112,9 +112,15 @@ export class SftpLauncher extends BaseLauncher {
 
   /**
    * Build SFTP command string (without sshpass wrapper)
+   * @param useSshpass - When true, adds options for non-interactive mode
    */
-  private buildSftpCommand(options: ConnectionOptions): string {
+  private buildSftpCommand(options: ConnectionOptions, useSshpass: boolean = false): string {
     const parts: string[] = ['sftp'];
+
+    // When using sshpass, auto-accept new host keys (still rejects changed keys)
+    if (useSshpass) {
+      parts.push('-o StrictHostKeyChecking=accept-new');
+    }
 
     // Port (note: SFTP uses -P uppercase)
     const port = options.port || 22;

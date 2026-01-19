@@ -69,7 +69,7 @@ export class SshLauncher extends BaseLauncher {
     options: ConnectionOptions,
     useSshpass: boolean
   ): Promise<void> {
-    const sshCommand = this.buildSshCommand(options);
+    const sshCommand = this.buildSshCommand(options, useSshpass);
 
     let command: string;
     if (useSshpass && options.password) {
@@ -99,7 +99,7 @@ export class SshLauncher extends BaseLauncher {
     useSshpass: boolean
   ): void {
     const terminalName = `SSH: ${options.displayName || options.hostname}`;
-    const sshCommand = this.buildSshCommand(options);
+    const sshCommand = this.buildSshCommand(options, useSshpass);
 
     if (useSshpass && options.password) {
       // Create terminal with SSHPASS env var set invisibly
@@ -119,9 +119,15 @@ export class SshLauncher extends BaseLauncher {
 
   /**
    * Build SSH command string (without sshpass wrapper)
+   * @param useSshpass - When true, adds options for non-interactive mode
    */
-  private buildSshCommand(options: ConnectionOptions): string {
+  private buildSshCommand(options: ConnectionOptions, useSshpass: boolean = false): string {
     const parts: string[] = ['ssh'];
+
+    // When using sshpass, auto-accept new host keys (still rejects changed keys)
+    if (useSshpass) {
+      parts.push('-o StrictHostKeyChecking=accept-new');
+    }
 
     // Identity file (SSH key) - takes priority over password
     if (options.identityFile) {
