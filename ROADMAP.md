@@ -169,15 +169,33 @@ interface PortForward {
 5. Jump Host / Bastion Support
 6. Port Forwarding UI
 
-### Phase 3: v0.4.0 (Windows + Polish)
-7. Windows Support
-8. Import from mRemoteNG/PuTTY
-9. Connection Timeout Settings
+### Phase 3: v0.4.0 (UI Restructure + Containers)
+7. **Separate Tree View Sections:**
+   - CONNECTIONS (file-based inventories)
+   - CLOUD SOURCES (AWS EC2, GCP Compute, Azure VMs)
+   - DOCKER (containers, images, compose)
+   - KUBERNETES (pods, services, deployments)
+   - PORT FORWARDING (existing)
+8. Docker Integration:
+   - List containers (local & remote)
+   - Exec into containers
+   - View logs
+   - Start/stop containers
+9. Kubernetes Integration:
+   - List pods across namespaces
+   - Exec into pods
+   - Port-forward to services
+   - View logs
+10. Windows Support
 
-### Phase 4: v1.0.0 (Feature Complete)
-10. VNC Support
-11. Bulk Operations
-12. Session History
+### Phase 4: v0.5.0 (Polish + Import)
+11. Import from mRemoteNG/PuTTY
+12. Connection Timeout Settings
+
+### Phase 5: v1.0.0 (Feature Complete)
+13. VNC Support
+14. Bulk Operations
+15. Session History
 
 ---
 
