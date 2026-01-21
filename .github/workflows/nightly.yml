@@ -62,6 +62,8 @@ jobs:
 
       - name: Compile TypeScript
         run: npm run compile
+        env:
+          NODE_OPTIONS: '--max-old-space-size=4096'
 
       - name: Install vsce
         run: npm install -g @vscode/vsce
@@ -73,6 +75,8 @@ jobs:
 
       - name: Package extension
         run: vsce package --out remote-server-manager-nightly-${{ matrix.platform }}.vsix
+        env:
+          NODE_OPTIONS: '--max-old-space-size=8192'
 
       - name: Upload artifact
         uses: actions/upload-artifact@v4

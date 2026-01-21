@@ -41,6 +41,8 @@ jobs:
 
       - name: Compile TypeScript
         run: npm run compile
+        env:
+          NODE_OPTIONS: '--max-old-space-size=4096'
 
       - name: Run tests
         run: npm test
@@ -51,6 +53,8 @@ jobs:
 
       - name: Package extension
         run: vsce package --out remote-server-manager-${{ matrix.platform }}.vsix
+        env:
+          NODE_OPTIONS: '--max-old-space-size=8192'
 
       - name: Upload artifact
         uses: actions/upload-artifact@v4
