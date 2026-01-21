@@ -19,12 +19,12 @@ const extensionConfig = {
     libraryTarget: 'commonjs2'
   },
   externals: {
-    vscode: 'commonjs vscode',
-    // Large SDKs - load from node_modules at runtime instead of bundling
-    '@aws-sdk/client-ec2': 'commonjs @aws-sdk/client-ec2',
-    '@aws-sdk/client-sts': 'commonjs @aws-sdk/client-sts',
-    '@aws-sdk/credential-providers': 'commonjs @aws-sdk/credential-providers',
-    '@google-cloud/compute': 'commonjs @google-cloud/compute',
+    vscode: 'commonjs vscode'
+  },
+  // Optimization to handle large dependencies without OOM
+  optimization: {
+    minimize: true,
+    splitChunks: false,
   },
   resolve: {
     extensions: ['.ts', '.js']

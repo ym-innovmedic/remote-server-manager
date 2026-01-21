@@ -8,7 +8,15 @@
       "Bash(code .)",
       "Bash(security dump-keychain)",
       "Bash(osascript:*)",
-      "Bash(ls:*)"
+      "Bash(ls:*)",
+      "mcp__elasticsearch-memory__save_memory",
+      "Bash(npx tsc:*)",
+      "Bash(npm run package:*)",
+      "Bash(npx @vscode/vsce:*)",
+      "Bash(node -e:*)",
+      "Bash(npx vsce:*)",
+      "Bash(git add:*)",
+      "Bash(git commit:*)"
     ]
   }
 }

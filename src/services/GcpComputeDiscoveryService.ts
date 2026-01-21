@@ -48,19 +48,21 @@ export class GcpComputeDiscoveryService {
       ? config.zones
       : await this.listAllZones(credentials);
 
-    // Discover from each zone
-    for (const zone of zones) {
-      try {
-        const zoneHosts = await this.discoverZone(
-          instancesClient,
-          credentials.projectId,
-          zone,
-          config
-        );
-        allHosts.push(...zoneHosts);
-      } catch (error) {
-        console.error(`[GcpComputeDiscovery] Error discovering zone ${zone}:`, error);
-        // Continue with other zones
+    // Discover from all zones in parallel (batched to avoid rate limits)
+    const batchSize = 10;
+    for (let i = 0; i < zones.length; i += batchSize) {
+      const batch = zones.slice(i, i + batchSize);
+      const results = await Promise.allSettled(
+        batch.map(zone => this.discoverZone(instancesClient, credentials.projectId, zone, config))
+      );
+
+      for (let j = 0; j < results.length; j++) {
+        const result = results[j];
+        if (result.status === 'fulfilled') {
+          allHosts.push(...result.value);
+        } else {
+          console.error(`[GcpComputeDiscovery] Error discovering zone ${batch[j]}:`, result.reason);
+        }
       }
     }
 
