@@ -1,4 +1,5 @@
 import * as vscode from 'vscode';
+import { logger } from '../utils/Logger';
 import { Credential, JsonCredential, convertJsonCredential } from '../models/Credential';
 import { CredentialStrategy } from '../models/Connection';
 
@@ -39,7 +40,7 @@ export class CredentialService {
    * Save a credential
    */
   async saveCredential(credential: Credential): Promise<void> {
-    console.log('[CredentialService] Saving credential:', {
+    logger.info('[CredentialService] Saving credential:', {
       id: credential.id,
       username: credential.username,
       strategy: credential.strategy,
@@ -66,28 +67,28 @@ export class CredentialService {
 
     // Store password separately if strategy is 'save'
     if (credential.strategy === 'save' && credential.password) {
-      console.log('[CredentialService] Storing password for:', credential.id);
+      logger.info('[CredentialService] Storing password for:', credential.id);
       await this.secrets.store(
         CREDENTIAL_PREFIX + credential.id + '.password',
         credential.password
       );
     } else {
-      console.log('[CredentialService] NOT storing password. Strategy:', credential.strategy, 'Has password:', !!credential.password);
+      logger.info('[CredentialService] NOT storing password. Strategy:', credential.strategy, 'Has password:', !!credential.password);
     }
 
     // Update credential list
     await this.addToCredentialList(credential.id);
-    console.log('[CredentialService] Credential saved successfully:', credential.id);
+    logger.info('[CredentialService] Credential saved successfully:', credential.id);
   }
 
   /**
    * Get a credential by ID
    */
   async getCredential(id: string): Promise<Credential | undefined> {
-    console.log('[CredentialService] Getting credential:', id);
+    logger.info('[CredentialService] Getting credential:', id);
     const data = await this.secrets.get(CREDENTIAL_PREFIX + id);
     if (!data) {
-      console.log('[CredentialService] No credential data found for:', id);
+      logger.info('[CredentialService] No credential data found for:', id);
       return undefined;
     }
 
@@ -107,10 +108,10 @@ export class CredentialService {
       // Get password if strategy is 'save'
       if (credential.strategy === 'save') {
         credential.password = await this.secrets.get(CREDENTIAL_PREFIX + id + '.password');
-        console.log('[CredentialService] Retrieved password for', id, ':', credential.password ? 'YES' : 'NO');
+        logger.info('[CredentialService] Retrieved password for', id, ':', credential.password ? 'YES' : 'NO');
       }
 
-      console.log('[CredentialService] Loaded credential:', {
+      logger.info('[CredentialService] Loaded credential:', {
         id: credential.id,
         username: credential.username,
         strategy: credential.strategy,
@@ -119,7 +120,7 @@ export class CredentialService {
 
       return credential;
     } catch {
-      console.error(`[CredentialService] Failed to parse credential: ${id}`);
+      logger.error(`[CredentialService] Failed to parse credential: ${id}`);
       return undefined;
     }
   }

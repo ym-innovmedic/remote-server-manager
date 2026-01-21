@@ -9,6 +9,7 @@ import * as fs from 'fs';
 import * as net from 'net';
 import { PortForward } from '../models/PortForward';
 import { BaseLauncher } from './BaseLauncher';
+import { logger } from '../utils/Logger';
 
 /**
  * Tunnel process info
@@ -60,7 +61,7 @@ export class TunnelLauncher extends BaseLauncher {
   launchTunnel(tunnel: PortForward): TunnelProcess {
     const args = this.buildSshArgs(tunnel);
 
-    console.log(`[TunnelLauncher] Starting tunnel: ssh ${args.join(' ')}`);
+    logger.info(`[TunnelLauncher] Starting tunnel: ssh ${args.join(' ')}`);
 
     const process = spawn('ssh', args, {
       stdio: ['ignore', 'pipe', 'pipe'],
@@ -100,7 +101,7 @@ export class TunnelLauncher extends BaseLauncher {
 
     // Handle process exit
     process.on('exit', (code) => {
-      console.log(`[TunnelLauncher] Tunnel process exited with code ${code}`);
+      logger.info(`[TunnelLauncher] Tunnel process exited with code ${code}`);
 
       if (code === 0) {
         tunnelProcess.tunnel.status = 'stopped';
@@ -116,7 +117,7 @@ export class TunnelLauncher extends BaseLauncher {
 
     // Handle process error
     process.on('error', (error) => {
-      console.error(`[TunnelLauncher] Process error:`, error);
+      logger.error(`[TunnelLauncher] Process error:`, error);
       tunnelProcess.tunnel.status = 'error';
       tunnelProcess.tunnel.errorMessage = error.message;
       this.eventHandlers?.onError?.(tunnelProcess.tunnel, error.message);

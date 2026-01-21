@@ -16,7 +16,8 @@
       "Bash(node -e:*)",
       "Bash(npx vsce:*)",
       "Bash(git add:*)",
-      "Bash(git commit:*)"
+      "Bash(git commit:*)",
+      "Bash(gcloud compute instances list:*)"
     ]
   }
 }

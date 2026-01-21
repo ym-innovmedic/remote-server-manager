@@ -1,4 +1,5 @@
 import * as fs from 'fs';
+import { logger } from '../utils/Logger';
 import * as path from 'path';
 import * as os from 'os';
 import * as vscode from 'vscode';
@@ -257,7 +258,7 @@ end run
     // Write script to temp file and execute (more reliable than -e for complex scripts)
     const scriptPath = path.join(os.tmpdir(), `rdp_autologin_${Date.now()}.scpt`);
     fs.writeFileSync(scriptPath, script);
-    console.log('[RdpLauncher] Script written to:', scriptPath);
+    logger.info('[RdpLauncher] Script written to:', scriptPath);
 
     // Run AppleScript in background with output capture for debugging
     const child = spawn('osascript', [scriptPath], {
@@ -267,13 +268,13 @@ end run
 
     // Log output for debugging
     child.stdout?.on('data', (data: Buffer) => {
-      console.log('[RdpLauncher] Script output:', data.toString());
+      logger.info('[RdpLauncher] Script output:', data.toString());
     });
     child.stderr?.on('data', (data: Buffer) => {
-      console.log('[RdpLauncher] Script log:', data.toString());
+      logger.info('[RdpLauncher] Script log:', data.toString());
     });
     child.on('exit', (code) => {
-      console.log('[RdpLauncher] Script exited with code:', code);
+      logger.info('[RdpLauncher] Script exited with code:', code);
     });
 
     child.unref();
@@ -287,7 +288,7 @@ end run
       }
     }, 35000);
 
-    console.log('[RdpLauncher] Started auto-login script');
+    logger.info('[RdpLauncher] Started auto-login script');
   }
 
   /**

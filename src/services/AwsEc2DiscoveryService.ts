@@ -14,6 +14,7 @@ import {
 import type { Provider, AwsCredentialIdentity } from '@aws-sdk/types';
 import { AnsibleHost, AnsibleGroup } from '../models/Connection';
 import { AwsEc2Config, AwsGroupBy } from '../models/CloudSource';
+import { logger } from '../utils/Logger';
 
 /**
  * Discovery result for a region
@@ -53,7 +54,7 @@ export class AwsEc2DiscoveryService {
         const regionHosts = await this.discoverRegion(region, config, credentialProvider);
         allHosts.push(...regionHosts);
       } catch (error) {
-        console.error(`[AwsEc2Discovery] Error discovering region ${region}:`, error);
+        logger.error(`[AwsEc2Discovery] Error discovering region ${region}:`, error);
         // Continue with other regions
       }
     }

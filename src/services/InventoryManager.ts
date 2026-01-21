@@ -17,6 +17,7 @@ import { AwsEc2DiscoveryService } from './AwsEc2DiscoveryService';
 import { GcpComputeDiscoveryService } from './GcpComputeDiscoveryService';
 import { AwsCredentialProvider } from '../providers/AwsCredentialProvider';
 import { GcpCredentialProvider, GcpCredentials } from '../providers/GcpCredentialProvider';
+import { logger } from '../utils/Logger';
 
 /**
  * Cloud source configuration for storage
@@ -61,8 +62,8 @@ export class InventoryManager {
     const inventoryFiles = config.get<InventoryFileConfig[]>('inventoryFiles', []);
     const cloudSources = config.get<CloudSourceConfig[]>('cloudSources', []);
 
-    console.log('Loading inventory configuration:', JSON.stringify(inventoryFiles));
-    console.log('Loading cloud sources:', JSON.stringify(cloudSources));
+    logger.info('Loading inventory configuration:', JSON.stringify(inventoryFiles));
+    logger.info('Loading cloud sources:', JSON.stringify(cloudSources));
 
     this.sources = [];
 
@@ -70,16 +71,16 @@ export class InventoryManager {
     for (const fileConfig of inventoryFiles) {
       const { path: filePath, readOnly } = normalizeInventoryConfig(fileConfig);
       const resolvedPath = this.resolvePath(filePath);
-      console.log(`Loading inventory file: ${resolvedPath} (readOnly: ${readOnly})`);
+      logger.info(`Loading inventory file: ${resolvedPath} (readOnly: ${readOnly})`);
       const source = createInventorySource(resolvedPath, readOnly);
 
       try {
         this.loadInventoryFile(source);
         if (source.inventory) {
-          console.log(`Loaded ${source.inventory.groups.length} groups, ${source.inventory.ungroupedHosts.length} ungrouped hosts`);
+          logger.info(`Loaded ${source.inventory.groups.length} groups, ${source.inventory.ungroupedHosts.length} ungrouped hosts`);
         }
       } catch (error) {
-        console.error(`Failed to load inventory: ${String(error)}`);
+        logger.error(`Failed to load inventory: ${String(error)}`);
         source.error = `Failed to load: ${String(error)}`;
       }
 
@@ -102,14 +103,14 @@ export class InventoryManager {
           cloudConfig.config as GcpComputeConfig
         );
       } else {
-        console.warn(`Unknown cloud source type: ${String(cloudConfig.type)}`);
+        logger.warn(`Unknown cloud source type: ${String(cloudConfig.type)}`);
         continue;
       }
 
       this.sources.push(source);
     }
 
-    console.log(`Total inventory sources loaded: ${this.sources.length}`);
+    logger.info(`Total inventory sources loaded: ${this.sources.length}`);
   }
 
   /**
@@ -238,7 +239,7 @@ export class InventoryManager {
       }
     } catch (error) {
       source.error = `Refresh failed: ${error instanceof Error ? error.message : String(error)}`;
-      console.error(`[InventoryManager] Failed to refresh cloud source ${source.name}:`, error);
+      logger.error(`[InventoryManager] Failed to refresh cloud source ${source.name}:`, error);
     }
   }
 
@@ -251,7 +252,7 @@ export class InventoryManager {
       return;
     }
 
-    console.log(`[InventoryManager] Refreshing AWS EC2 source: ${source.name}`);
+    logger.info(`[InventoryManager] Refreshing AWS EC2 source: ${source.name}`);
 
     try {
       const credentialProvider = await this.awsCredentialProvider.getCredentialProvider(source.awsProfile);
@@ -268,7 +269,7 @@ export class InventoryManager {
       source.lastLoaded = new Date();
       source.error = undefined;
 
-      console.log(`[InventoryManager] AWS EC2 discovered ${result.totalCount} instances`);
+      logger.info(`[InventoryManager] AWS EC2 discovered ${result.totalCount} instances`);
     } catch (error) {
       source.error = error instanceof Error ? error.message : String(error);
       throw error;
@@ -284,7 +285,7 @@ export class InventoryManager {
       return;
     }
 
-    console.log(`[InventoryManager] Refreshing GCP Compute source: ${source.name}`);
+    logger.info(`[InventoryManager] Refreshing GCP Compute source: ${source.name}`);
 
     try {
       const credentials: GcpCredentials = {
@@ -306,7 +307,7 @@ export class InventoryManager {
       source.lastLoaded = new Date();
       source.error = undefined;
 
-      console.log(`[InventoryManager] GCP Compute discovered ${result.totalCount} instances`);
+      logger.info(`[InventoryManager] GCP Compute discovered ${result.totalCount} instances`);
     } catch (error) {
       source.error = error instanceof Error ? error.message : String(error);
       throw error;

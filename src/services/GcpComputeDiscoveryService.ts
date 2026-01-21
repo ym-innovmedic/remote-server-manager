@@ -9,6 +9,7 @@ import type { protos } from '@google-cloud/compute';
 import { AnsibleHost, AnsibleGroup } from '../models/Connection';
 import { GcpComputeConfig, GcpGroupBy } from '../models/CloudSource';
 import { GcpCredentials, GcpCredentialProvider } from '../providers/GcpCredentialProvider';
+import { logger } from '../utils/Logger';
 
 type Instance = protos.google.cloud.compute.v1.IInstance;
 
@@ -61,7 +62,7 @@ export class GcpComputeDiscoveryService {
         if (result.status === 'fulfilled') {
           allHosts.push(...result.value);
         } else {
-          console.error(`[GcpComputeDiscovery] Error discovering zone ${batch[j]}:`, result.reason);
+          logger.error(`[GcpComputeDiscovery] Error discovering zone ${batch[j]}:`, result.reason);
         }
       }
     }

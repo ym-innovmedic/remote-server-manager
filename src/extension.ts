@@ -18,6 +18,7 @@ import {
   requiresConnectionConfirmation,
   getEnvironmentWarning,
 } from './utils/serverEnvironment';
+import { logger } from './utils/Logger';
 
 let credentialService: CredentialService;
 let connectionService: ConnectionService;
@@ -28,7 +29,11 @@ let portForwardingService: PortForwardingService;
 let portForwardingTreeProvider: PortForwardingTreeProvider;
 
 export function activate(context: vscode.ExtensionContext): void {
-  console.log('Remote Server Manager is now active');
+  // Initialize logger first
+  const outputChannel = logger.initialize();
+  context.subscriptions.push(outputChannel);
+
+  logger.info('Remote Server Manager is now active');
 
   // Initialize services
   credentialService = new CredentialService(context.secrets);
@@ -673,5 +678,5 @@ export function activate(context: vscode.ExtensionContext): void {
 }
 
 export function deactivate(): void {
-  console.log('Remote Server Manager is now deactivated');
+  logger.info('Remote Server Manager is now deactivated');
 }

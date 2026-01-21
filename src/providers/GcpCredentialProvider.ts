@@ -11,6 +11,7 @@ import * as os from 'os';
 import { exec } from 'child_process';
 import { promisify } from 'util';
 import { GCP_REGIONS } from '../models/CloudSource';
+import { logger } from '../utils/Logger';
 
 const execAsync = promisify(exec);
 
@@ -69,7 +70,7 @@ export class GcpCredentialProvider {
         name: p.name,
       }));
     } catch (error) {
-      console.warn('[GcpCredentialProvider] Failed to list projects via gcloud:', error);
+      logger.warn('[GcpCredentialProvider] Failed to list projects via gcloud:', error);
       return [];
     }
   }

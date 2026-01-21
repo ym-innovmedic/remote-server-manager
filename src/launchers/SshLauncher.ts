@@ -1,4 +1,5 @@
 import * as vscode from 'vscode';
+import { logger } from '../utils/Logger';
 import * as fs from 'fs';
 import * as path from 'path';
 import * as os from 'os';
@@ -34,7 +35,7 @@ export class SshLauncher extends BaseLauncher {
     const canUseSshpass = !useKeyAuth && !!(options.password && await this.checkSshpassAvailable());
 
     if (useKeyAuth) {
-      console.log(`[SshLauncher] Using key-based authentication: ${options.identityFile}`);
+      logger.info(`[SshLauncher] Using key-based authentication: ${options.identityFile}`);
     }
 
     if (terminalType === 'integrated') {
@@ -135,7 +136,7 @@ export class SshLauncher extends BaseLauncher {
       if (fs.existsSync(options.identityFile)) {
         parts.push(`-i "${options.identityFile}"`);
       } else {
-        console.warn(`[SshLauncher] Identity file not found: ${options.identityFile}`);
+        logger.warn(`[SshLauncher] Identity file not found: ${options.identityFile}`);
       }
     }
 
