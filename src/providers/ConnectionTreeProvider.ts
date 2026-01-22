@@ -161,9 +161,13 @@ export class ConnectionTreeItem extends vscode.TreeItem {
     // Set tooltip
     this.tooltip = this.buildTooltip(host, connectionType);
 
-    // Set context value for prod servers (for conditional menu items)
+    // Set context value based on connection type and environment (for conditional menu items)
+    // Format: connection-{type} or connection-{type}-prod
+    const connTypeSuffix = connectionType === 'rdp' ? 'rdp' : 'ssh';
     if (this.serverEnvironment === 'prod') {
-      this.contextValue = 'connection-prod';
+      this.contextValue = `connection-${connTypeSuffix}-prod`;
+    } else {
+      this.contextValue = `connection-${connTypeSuffix}`;
     }
 
     // Enable double-click to connect
@@ -435,6 +439,26 @@ export class ConnectionTreeProvider implements vscode.TreeDataProvider<Connectio
     }
 
     return Array.from(tagSet).sort();
+  }
+
+  /**
+   * Get all hosts in a group by group name
+   */
+  getHostsInGroup(groupName: string): AnsibleHost[] {
+    const hosts: AnsibleHost[] = [];
+    const sources = this.inventoryManager.getSources();
+
+    for (const source of sources) {
+      if (!source.inventory) {continue;}
+
+      for (const group of source.inventory.groups) {
+        if (group.name === groupName) {
+          hosts.push(...group.hosts);
+        }
+      }
+    }
+
+    return hosts;
   }
 
   /**

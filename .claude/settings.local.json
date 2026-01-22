@@ -17,7 +17,11 @@
       "Bash(npx vsce:*)",
       "Bash(git add:*)",
       "Bash(git commit:*)",
-      "Bash(gcloud compute instances list:*)"
+      "Bash(gcloud compute instances list:*)",
+      "Bash(NODE_OPTIONS='--max-old-space-size=8192' vsce package:*)",
+      "Bash(NODE_OPTIONS='--max-old-space-size=8192' npm run compile:*)",
+      "Bash(NODE_OPTIONS='--max-old-space-size=4096' npm run compile:*)",
+      "Bash(NODE_OPTIONS='--max-old-space-size=8192' npx webpack:*)"
     ]
   }
 }

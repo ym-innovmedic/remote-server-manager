@@ -11,6 +11,7 @@ import { ImportService } from './services/ImportService';
 import { UsageTrackingService } from './services/UsageTrackingService';
 import { PortForwardingService } from './services/PortForwardingService';
 import { PortForwardingTreeProvider, PortForwardingTreeItem } from './providers/PortForwardingTreeProvider';
+import { SshKeyBootstrapService } from './services/SshKeyBootstrapService';
 import type { AnsibleHost } from './models/Connection';
 import type { PortForward } from './models/PortForward';
 import { AwsEc2Config, GcpComputeConfig } from './models/CloudSource';
@@ -27,6 +28,7 @@ let treeProvider: ConnectionTreeProvider;
 let usageTrackingService: UsageTrackingService;
 let portForwardingService: PortForwardingService;
 let portForwardingTreeProvider: PortForwardingTreeProvider;
+let sshKeyBootstrapService: SshKeyBootstrapService;
 
 export function activate(context: vscode.ExtensionContext): void {
   // Initialize logger first
@@ -41,7 +43,8 @@ export function activate(context: vscode.ExtensionContext): void {
   inventoryManager.initializeCloudProviders(context.secrets);
   connectionService = new ConnectionService(inventoryManager, credentialService);
   usageTrackingService = new UsageTrackingService(context.globalState);
-  portForwardingService = new PortForwardingService();
+  portForwardingService = new PortForwardingService(credentialService);
+  sshKeyBootstrapService = new SshKeyBootstrapService(credentialService, inventoryManager);
   const quickConnectService = new QuickConnectService(connectionService, credentialService);
   const importService = new ImportService(inventoryManager, credentialService);
 
@@ -373,6 +376,92 @@ export function activate(context: vscode.ExtensionContext): void {
       }
     }),
 
+    // SSH Key Bootstrap - single host (v0.3.0)
+    vscode.commands.registerCommand('remoteServerManager.bootstrapSshKey', async (item: ConnectionTreeItem) => {
+      const host = item.data as AnsibleHost;
+      if (!host) {
+        void vscode.window.showErrorMessage('No host selected');
+        return;
+      }
+
+      const success = await sshKeyBootstrapService.bootstrapHost(host);
+      if (success) {
+        treeProvider.refresh();
+      }
+    }),
+
+    // SSH Key Bootstrap - group (v0.3.0)
+    vscode.commands.registerCommand('remoteServerManager.bootstrapSshKeyGroup', async (item: ConnectionTreeItem) => {
+      if (item.contextValue !== 'group') {
+        void vscode.window.showErrorMessage('Please select a group');
+        return;
+      }
+
+      // Get hosts in the group
+      const groupName = item.label?.toString();
+      if (!groupName) {
+        return;
+      }
+
+      const hosts = treeProvider.getHostsInGroup(groupName);
+      if (hosts.length === 0) {
+        void vscode.window.showInformationMessage('No hosts found in this group');
+        return;
+      }
+
+      // Confirm
+      const confirm = await vscode.window.showWarningMessage(
+        `Setup SSH key authentication for ${hosts.length} server${hosts.length !== 1 ? 's' : ''} in "${groupName}"?`,
+        { modal: true },
+        'Setup All',
+        'Cancel'
+      );
+
+      if (confirm !== 'Setup All') {
+        return;
+      }
+
+      // Bootstrap each host
+      let successCount = 0;
+      let failCount = 0;
+
+      await vscode.window.withProgress({
+        location: vscode.ProgressLocation.Notification,
+        title: 'Setting up SSH key authentication...',
+        cancellable: true,
+      }, async (progress, token) => {
+        for (let i = 0; i < hosts.length; i++) {
+          if (token.isCancellationRequested) {
+            break;
+          }
+
+          const host = hosts[i];
+          progress.report({
+            message: `${host.name} (${i + 1}/${hosts.length})`,
+            increment: (100 / hosts.length),
+          });
+
+          try {
+            const success = await sshKeyBootstrapService.bootstrapHost(host);
+            if (success) {
+              successCount++;
+            } else {
+              failCount++;
+            }
+          } catch (error) {
+            logger.error(`[Bootstrap] Failed for ${host.name}:`, error);
+            failCount++;
+          }
+        }
+      });
+
+      void vscode.window.showInformationMessage(
+        `SSH key setup complete: ${successCount} succeeded, ${failCount} failed`
+      );
+
+      treeProvider.refresh();
+    }),
+
     // AWS EC2 Source (v0.3.0)
     vscode.commands.registerCommand('remoteServerManager.addAwsEc2Source', async () => {
       const awsCredentialProvider = inventoryManager.getAwsCredentialProvider();
@@ -607,6 +696,7 @@ export function activate(context: vscode.ExtensionContext): void {
 
     vscode.commands.registerCommand('remoteServerManager.restartTunnel', async (item: PortForwardingTreeItem) => {
       if (item.tunnel) {
+        // Service handles password: tries stored credential first, then prompts if needed
         const tunnel = await portForwardingService.restartTunnel(item.tunnel.id);
         if (tunnel) {
           void vscode.window.showInformationMessage(`Tunnel "${tunnel.name}" restarted`);
@@ -633,7 +723,10 @@ export function activate(context: vscode.ExtensionContext): void {
       });
     }),
 
-    vscode.commands.registerCommand('remoteServerManager.viewTunnelDetails', (tunnel: PortForward) => {
+    vscode.commands.registerCommand('remoteServerManager.viewTunnelDetails', (item: PortForwardingTreeItem | PortForward) => {
+      // Handle both tree item (from context menu) and tunnel directly (from click)
+      const tunnel = 'tunnel' in item ? item.tunnel : item;
+
       const details = [
         `Name: ${tunnel.name}`,
         `Type: ${tunnel.type}`,

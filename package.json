@@ -247,6 +247,16 @@
         "command": "remoteServerManager.refreshTunnels",
         "title": "Refresh Tunnels",
         "icon": "$(refresh)"
+      },
+      {
+        "command": "remoteServerManager.bootstrapSshKey",
+        "title": "Setup SSH Key Authentication",
+        "icon": "$(key)"
+      },
+      {
+        "command": "remoteServerManager.bootstrapSshKeyGroup",
+        "title": "Setup SSH Key Authentication (All Hosts)",
+        "icon": "$(key)"
       }
     ],
     "menus": {
@@ -295,12 +305,12 @@
         },
         {
           "command": "remoteServerManager.connectSsh",
-          "when": "view == remoteServerManager && viewItem =~ /connection/",
+          "when": "view == remoteServerManager && viewItem =~ /connection-ssh/",
           "group": "1_connect@2"
         },
         {
           "command": "remoteServerManager.connectSftp",
-          "when": "view == remoteServerManager && viewItem =~ /connection/",
+          "when": "view == remoteServerManager && viewItem =~ /connection-ssh/",
           "group": "1_connect@3"
         },
         {
@@ -350,13 +360,23 @@
         },
         {
           "command": "remoteServerManager.createLocalForward",
-          "when": "view == remoteServerManager && viewItem =~ /connection/",
+          "when": "view == remoteServerManager && viewItem =~ /connection-ssh/",
           "group": "5_tunnel@1"
         },
         {
           "command": "remoteServerManager.createDynamicForward",
-          "when": "view == remoteServerManager && viewItem =~ /connection/",
+          "when": "view == remoteServerManager && viewItem =~ /connection-ssh/",
           "group": "5_tunnel@2"
+        },
+        {
+          "command": "remoteServerManager.bootstrapSshKey",
+          "when": "view == remoteServerManager && viewItem =~ /connection-ssh/",
+          "group": "6_security@1"
+        },
+        {
+          "command": "remoteServerManager.bootstrapSshKeyGroup",
+          "when": "view == remoteServerManager && viewItem == group",
+          "group": "2_security@1"
         },
         {
           "command": "remoteServerManager.removeCloudSource",
@@ -609,7 +629,7 @@
   },
   "scripts": {
     "vscode:prepublish": "npm run package",
-    "compile": "webpack",
+    "compile": "NODE_OPTIONS='--max-old-space-size=8192' webpack",
     "watch": "webpack --watch",
     "package": "NODE_OPTIONS='--max-old-space-size=8192' webpack --mode production --devtool hidden-source-map",
     "compile-tests": "tsc -p . --outDir out",

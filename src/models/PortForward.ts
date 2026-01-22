@@ -26,8 +26,10 @@ export interface PortForward {
   sshHost: string;
   sshPort?: number;
   sshUser?: string;
+  sshPassword?: string; // For sshpass authentication
   identityFile?: string;
   proxyJump?: string;
+  credentialId?: string; // Reference to stored credential for restart
 
   // Tunnel configuration
   localPort: number;
@@ -52,8 +54,10 @@ export interface LocalForwardConfig {
   sshHost: string;
   sshPort?: number;
   sshUser?: string;
+  sshPassword?: string;
   identityFile?: string;
   proxyJump?: string;
+  credentialId?: string;
   localPort: number;
   remoteHost: string;
   remotePort: number;
@@ -69,8 +73,10 @@ export interface RemoteForwardConfig {
   sshHost: string;
   sshPort?: number;
   sshUser?: string;
+  sshPassword?: string;
   identityFile?: string;
   proxyJump?: string;
+  credentialId?: string;
   localPort: number;
   remotePort: number;
   name?: string;
@@ -85,8 +91,10 @@ export interface DynamicForwardConfig {
   sshHost: string;
   sshPort?: number;
   sshUser?: string;
+  sshPassword?: string;
   identityFile?: string;
   proxyJump?: string;
+  credentialId?: string;
   localPort: number;
   name?: string;
   hostName?: string;
@@ -268,8 +276,10 @@ export function createLocalForward(config: LocalForwardConfig): PortForward {
     sshHost: config.sshHost,
     sshPort: config.sshPort,
     sshUser: config.sshUser,
+    sshPassword: config.sshPassword,
     identityFile: config.identityFile,
     proxyJump: config.proxyJump,
+    credentialId: config.credentialId,
     localPort: config.localPort,
     remoteHost: config.remoteHost,
     remotePort: config.remotePort,
@@ -290,8 +300,10 @@ export function createRemoteForward(config: RemoteForwardConfig): PortForward {
     sshHost: config.sshHost,
     sshPort: config.sshPort,
     sshUser: config.sshUser,
+    sshPassword: config.sshPassword,
     identityFile: config.identityFile,
     proxyJump: config.proxyJump,
+    credentialId: config.credentialId,
     localPort: config.localPort,
     remotePort: config.remotePort,
     status: 'stopped',
@@ -311,8 +323,10 @@ export function createDynamicForward(config: DynamicForwardConfig): PortForward 
     sshHost: config.sshHost,
     sshPort: config.sshPort,
     sshUser: config.sshUser,
+    sshPassword: config.sshPassword,
     identityFile: config.identityFile,
     proxyJump: config.proxyJump,
+    credentialId: config.credentialId,
     localPort: config.localPort,
     status: 'stopped',
     hostName: config.hostName,

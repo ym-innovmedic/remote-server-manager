@@ -36,7 +36,10 @@ const extensionConfig = {
         exclude: /node_modules/,
         use: [
           {
-            loader: 'ts-loader'
+            loader: 'ts-loader',
+            options: {
+              transpileOnly: true, // Reduces memory usage
+            }
           }
         ]
       }

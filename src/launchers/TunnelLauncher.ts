@@ -60,29 +60,44 @@ export class TunnelLauncher extends BaseLauncher {
    */
   launchTunnel(tunnel: PortForward): TunnelProcess {
     const args = this.buildSshArgs(tunnel);
+    const useSshpass = !!tunnel.sshPassword && !tunnel.identityFile;
 
-    logger.info(`[TunnelLauncher] Starting tunnel: ssh ${args.join(' ')}`);
+    let command: string;
+    let spawnArgs: string[];
+    let env = { ...process.env };
 
-    const process = spawn('ssh', args, {
+    if (useSshpass) {
+      command = 'sshpass';
+      spawnArgs = ['-e', 'ssh', ...args];
+      env.SSHPASS = tunnel.sshPassword;
+      logger.info(`[TunnelLauncher] Starting tunnel with sshpass: ssh ${args.join(' ')}`);
+    } else {
+      command = 'ssh';
+      spawnArgs = args;
+      logger.info(`[TunnelLauncher] Starting tunnel: ssh ${args.join(' ')}`);
+    }
+
+    const childProcess = spawn(command, spawnArgs, {
       stdio: ['ignore', 'pipe', 'pipe'],
       detached: false,
+      env,
     });
 
     const tunnelProcess: TunnelProcess = {
-      tunnel: { ...tunnel, status: 'connecting', pid: process.pid },
-      process,
+      tunnel: { ...tunnel, status: 'connecting', pid: childProcess.pid },
+      process: childProcess,
       output: [],
     };
 
     // Handle stdout
-    process.stdout?.on('data', (data: Buffer) => {
+    childProcess.stdout?.on('data', (data: Buffer) => {
       const output = data.toString();
       tunnelProcess.output.push(output);
       this.eventHandlers?.onOutput?.(tunnelProcess.tunnel, output);
     });
 
     // Handle stderr
-    process.stderr?.on('data', (data: Buffer) => {
+    childProcess.stderr?.on('data', (data: Buffer) => {
       const output = data.toString();
       tunnelProcess.output.push(output);
 
@@ -100,7 +115,7 @@ export class TunnelLauncher extends BaseLauncher {
     });
 
     // Handle process exit
-    process.on('exit', (code) => {
+    childProcess.on('exit', (code) => {
       logger.info(`[TunnelLauncher] Tunnel process exited with code ${code}`);
 
       if (code === 0) {
@@ -116,7 +131,7 @@ export class TunnelLauncher extends BaseLauncher {
     });
 
     // Handle process error
-    process.on('error', (error) => {
+    childProcess.on('error', (error) => {
       logger.error(`[TunnelLauncher] Process error:`, error);
       tunnelProcess.tunnel.status = 'error';
       tunnelProcess.tunnel.errorMessage = error.message;
@@ -149,6 +164,11 @@ export class TunnelLauncher extends BaseLauncher {
 
     // Exit on tunnel failure
     args.push('-o', 'ExitOnForwardFailure=yes');
+
+    // Auto-accept new host keys when using sshpass (can't prompt interactively)
+    if (tunnel.sshPassword && !tunnel.identityFile) {
+      args.push('-o', 'StrictHostKeyChecking=accept-new');
+    }
 
     // Batch mode (no password prompts, fail if key auth fails)
     if (tunnel.identityFile) {

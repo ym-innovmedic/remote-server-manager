@@ -94,8 +94,9 @@ db2.example.com ansible_host=192.168.1.100
    - Save
 
 2. **Assign credential to host:**
-   - Right-click host → "Assign Credential"
-   - Select the credential you created
+   - Right-click host → "Edit Connection"
+   - Select "$(key) Credential"
+   - Choose the credential you created
 
 3. **Connect:**
    - Right-click host → "Connect via SSH"
@@ -123,7 +124,8 @@ db2.example.com ansible_host=192.168.1.100
      - Identity File: `~/.ssh/id_ed25519`
 
 2. **Assign and connect:**
-   - Right-click host → "Assign Credential"
+   - Right-click host → "Edit Connection"
+   - Select "$(key) Credential" and choose your key credential
    - Right-click host → "Connect via SSH"
 
 ### Expected:

@@ -17,6 +17,7 @@ import {
 } from '../models/PortForward';
 import { TunnelLauncher, TunnelProcess } from '../launchers/TunnelLauncher';
 import { AnsibleHost } from '../models/Connection';
+import { CredentialService } from './CredentialService';
 
 /**
  * Event emitter for tunnel state changes
@@ -35,6 +36,7 @@ export class PortForwardingService {
   private tunnelLauncher: TunnelLauncher;
   private activeTunnels: Map<string, TunnelProcess> = new Map();
   private statusBarItem: vscode.StatusBarItem;
+  private credentialService?: CredentialService;
 
   // Event emitters
   private _onTunnelStarted = new vscode.EventEmitter<PortForward>();
@@ -47,7 +49,8 @@ export class PortForwardingService {
   readonly onTunnelError = this._onTunnelError.event;
   readonly onTunnelsChanged = this._onTunnelsChanged.event;
 
-  constructor() {
+  constructor(credentialService?: CredentialService) {
+    this.credentialService = credentialService;
     this.tunnelLauncher = new TunnelLauncher({
       onStarted: (tunnel) => {
         this._onTunnelStarted.fire(tunnel);
@@ -166,8 +169,9 @@ export class PortForwardingService {
 
   /**
    * Restart a tunnel
+   * If no password provided, tries to get from stored credential, then prompts
    */
-  async restartTunnel(id: string): Promise<PortForward | undefined> {
+  async restartTunnel(id: string, sshPassword?: string): Promise<PortForward | undefined> {
     const tunnelProcess = this.activeTunnels.get(id);
     if (!tunnelProcess) {
       return undefined;
@@ -181,6 +185,30 @@ export class PortForwardingService {
     tunnelConfig.errorMessage = undefined;
     tunnelConfig.startedAt = undefined;
     tunnelConfig.pid = undefined;
+
+    // Get password: use provided, or try stored credential, or prompt
+    if (sshPassword !== undefined) {
+      tunnelConfig.sshPassword = sshPassword;
+    } else if (!tunnelConfig.identityFile) {
+      // Try stored credential first
+      if (this.credentialService && tunnelConfig.credentialId) {
+        const credResult = await this.credentialService.getCredentialForSsh(
+          tunnelConfig.credentialId,
+          tunnelConfig.hostName || tunnelConfig.sshHost
+        );
+        if (credResult?.password) {
+          tunnelConfig.sshPassword = credResult.password;
+        }
+      }
+
+      // If still no password, prompt
+      if (!tunnelConfig.sshPassword) {
+        tunnelConfig.sshPassword = await this.promptForPassword(
+          tunnelConfig.sshUser,
+          tunnelConfig.sshHost
+        );
+      }
+    }
 
     return this.startTunnel(tunnelConfig);
   }
@@ -249,6 +277,45 @@ export class PortForwardingService {
    */
   showStatusBar(): void {
     this.updateStatusBar();
+  }
+
+  /**
+   * Get SSH password for a host - tries stored credential first, then prompts
+   */
+  private async getSshPassword(host: AnsibleHost): Promise<string | undefined> {
+    // Skip if using SSH key authentication
+    if (host.remote_mgr_identity_file) {
+      return undefined;
+    }
+
+    // Try stored credential first
+    if (this.credentialService && host.remote_mgr_credential_id) {
+      const credResult = await this.credentialService.getCredentialForSsh(
+        host.remote_mgr_credential_id,
+        host.name
+      );
+      if (credResult?.password) {
+        return credResult.password;
+      }
+    }
+
+    // Prompt for password
+    return vscode.window.showInputBox({
+      prompt: `Enter SSH password for ${host.ansible_user || 'user'}@${host.ansible_host || host.name}`,
+      password: true,
+      placeHolder: 'Password (leave empty to skip auto-login)',
+    });
+  }
+
+  /**
+   * Prompt for SSH password (for restart tunnel without host context)
+   */
+  async promptForPassword(sshUser: string | undefined, sshHost: string): Promise<string | undefined> {
+    return vscode.window.showInputBox({
+      prompt: `Enter SSH password for ${sshUser || 'user'}@${sshHost}`,
+      password: true,
+      placeHolder: 'Password (leave empty to skip auto-login)',
+    });
   }
 
   /**
@@ -347,12 +414,17 @@ export class PortForwardingService {
       }
     }
 
+    // Get password from stored credential or prompt
+    const sshPassword = await this.getSshPassword(host);
+
     return {
       sshHost: host.ansible_host || host.name,
       sshPort: host.ansible_port,
       sshUser: host.ansible_user,
+      sshPassword,
       identityFile: host.remote_mgr_identity_file,
       proxyJump: host.remote_mgr_proxy_jump,
+      credentialId: host.remote_mgr_credential_id,
       localPort,
       remoteHost,
       remotePort,
@@ -405,12 +477,17 @@ export class PortForwardingService {
       }
     }
 
+    // Get password from stored credential or prompt
+    const sshPassword = await this.getSshPassword(host);
+
     return {
       sshHost: host.ansible_host || host.name,
       sshPort: host.ansible_port,
       sshUser: host.ansible_user,
+      sshPassword,
       identityFile: host.remote_mgr_identity_file,
       proxyJump: host.remote_mgr_proxy_jump,
+      credentialId: host.remote_mgr_credential_id,
       localPort,
       name: `SOCKS via ${host.remote_mgr_display_name || host.name}`,
       hostName: host.name,
